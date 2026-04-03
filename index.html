@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jessup University — Strategic Budget Platform</title>
+
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --nav:#0d1b2a;--navb:#1a2e42;--navt:#8ba3bb;--nava:#e8f0eb;--navh:#1e3048;
+  --bg:#f4f2ed;--sur:#fff;--sur2:#f0ede6;--bdr:#ddd9d0;
+  --tx:#1a1814;--tx2:#5a5650;--tx3:#8a8680;
+  --g:#1f6b3a;--gl:#e8f4ed;--gm:#2d8a50;
+  --r:#b91c1c;--rl:#fef2f2;--am:#b45309;--al:#fffbeb;--bl:#1d4ed8;--bll:#eff6ff;
+  --rad:6px;--radl:10px;--mono:'DM Mono','SF Mono',ui-monospace,'Cascadia Code','Consolas',monospace;--sans:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--tx);display:flex;height:100vh;overflow:hidden;font-size:13px}
+
+/* NAV */
+.sb{width:210px;min-width:210px;background:var(--nav);display:flex;flex-direction:column;border-right:1px solid var(--navb);overflow-y:auto}
+.sbl{padding:18px 16px 14px;border-bottom:1px solid var(--navb)}
+.sbl .org{font-size:10px;font-weight:600;color:#4a7fa5;text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px}
+.sbl .ti{font-size:13px;font-weight:600;color:var(--nava);line-height:1.3}
+.sbl .su{font-size:10px;color:var(--navt);margin-top:2px}
+.ns{padding:12px 0 6px}
+.nsl{padding:0 14px 5px;font-size:10px;font-weight:600;color:#3a5a73;text-transform:uppercase;letter-spacing:.08em}
+.ni{display:flex;align-items:center;gap:7px;padding:6px 14px;cursor:pointer;color:var(--navt);font-size:12px;transition:all .15s;border-left:3px solid transparent}
+.ni:hover{background:var(--navh);color:#c5d9e8}
+.ni.active{background:var(--navh);color:var(--nava);border-left-color:#2d8a50;font-weight:500}
+.nd{width:6px;height:6px;border-radius:50%;background:#3a5a73;flex-shrink:0}
+.ni.active .nd,.ni:hover .nd{background:#2d8a50}
+.ni.alert .nd{background:#dc2626}
+.ndiv{height:1px;background:var(--navb);margin:6px 0}
+.sf{margin-top:auto;padding:10px 14px;border-top:1px solid var(--navb)}
+.db{background:#7f1d1d;border-radius:6px;padding:8px 10px}
+.db .dl{font-size:9px;color:#fca5a5;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.db .dv{font-family:var(--mono);font-size:17px;font-weight:500;color:#fef2f2;margin-top:1px}
+.db .ds{font-size:9px;color:#fca5a5;margin-top:1px}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.tb{background:var(--sur);border-bottom:1px solid var(--bdr);padding:0 22px;height:50px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.tb-ti{font-size:14px;font-weight:600}
+.tb-su{font-size:10px;color:var(--tx3);margin-top:1px}
+.fbadge{background:var(--sur2);border:1px solid var(--bdr);border-radius:4px;padding:3px 9px;font-size:10px;font-weight:500;color:var(--tx2);font-family:var(--mono)}
+.con{flex:1;overflow-y:auto;padding:18px 22px}
+
+/* KPI */
+.kr{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin-bottom:14px}
+.kpi{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--radl);padding:11px 13px}
+.kpi.danger{background:var(--rl);border-color:#fecaca}
+.kpi.success{background:var(--gl);border-color:#bbf7d0}
+.kpi.amber{background:var(--al);border-color:#fde68a}
+.kpi.dark{background:var(--nav);border-color:var(--navb)}
+.kl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3);margin-bottom:3px}
+.kpi.danger .kl{color:#dc2626}.kpi.success .kl{color:#15803d}.kpi.dark .kl{color:#4a7fa5}
+.kv{font-size:21px;font-weight:300;font-family:var(--mono);letter-spacing:-.02em}
+.kpi.danger .kv{color:var(--r)}.kpi.success .kv{color:var(--g)}.kpi.amber .kv{color:var(--am)}.kpi.dark .kv{color:#c5d9e8}
+.ks{font-size:10px;color:var(--tx3);margin-top:2px}
+.kpi.dark .ks{color:#4a7fa5}
+
+/* CARDS */
+.card{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--radl);padding:14px;margin-bottom:14px}
+.ct{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);padding:5px 8px;border-bottom:1px solid var(--bdr)}
+th.r,td.r{text-align:right}
+th.c,td.c{text-align:center}
+td{padding:5px 8px;border-bottom:1px solid var(--bdr);font-family:var(--mono);font-size:11px}
+td.lab{font-family:var(--sans);font-size:11px;color:var(--tx2)}
+tr:last-child td{border-bottom:none}
+tr.tot td{background:var(--sur2);font-weight:500}
+.pos{color:var(--g)}.neg{color:var(--r)}.warn{color:var(--am)}
+.badge{display:inline-block;font-size:9px;font-weight:600;padding:2px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em}
+.bg{background:var(--gl);color:var(--g)}.br{background:var(--rl);color:var(--r)}.ba{background:var(--al);color:var(--am)}.bb{background:var(--bll);color:var(--bl)}
+.pill{display:inline-block;padding:2px 7px;border-radius:10px;font-size:9px;font-weight:600}
+.pg{background:var(--gl);color:var(--g)}.pr{background:var(--rl);color:var(--r)}.pa{background:var(--al);color:var(--am)}.pb{background:var(--bll);color:var(--bl)}
+
+/* ALERTS */
+.ab{border-radius:var(--rad);padding:11px 13px;margin-bottom:12px;font-size:11px;line-height:1.6}
+.ab.red{background:var(--rl);border:1px solid #fecaca;color:#7f1d1d}
+.ab.amber{background:var(--al);border:1px solid #fde68a;color:#78350f}
+.ab.green{background:var(--gl);border:1px solid #bbf7d0;color:#14532d}
+.ab .at{font-weight:700;margin-bottom:3px;font-size:11px}
+
+/* GRANULAR CONTROLS */
+.ctrl-table td{padding:4px 6px}
+.tog-group{display:flex;border:1px solid var(--bdr);border-radius:5px;overflow:hidden}
+.tog{padding:3px 8px;font-size:10px;font-weight:500;cursor:pointer;background:var(--sur2);color:var(--tx3);border:none;outline:none;white-space:nowrap;transition:all .12s}
+.tog:hover{background:var(--bdr)}
+.tog.active-g{background:var(--g);color:#fff}
+.tog.active-a{background:var(--am);color:#fff}
+.tog.active-r{background:var(--r);color:#fff}
+.tog.active-b{background:var(--bl);color:#fff}
+.impact-cell{font-family:var(--mono);font-size:11px;font-weight:500;min-width:64px;text-align:right}
+
+/* SLIDERS */
+.slrow{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.slrow label{font-size:11px;color:var(--tx2);font-weight:500;flex:1}
+.slrow input[type=range]{flex:1;accent-color:var(--g);cursor:pointer}
+.slval{font-family:var(--mono);font-size:11px;color:var(--g);font-weight:500;min-width:38px;text-align:right}
+
+/* FY27 RESULT */
+.fy27box{background:var(--sur2);border-radius:var(--rad);padding:14px;display:flex;gap:20px;align-items:center}
+.fy27-net-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);margin-bottom:3px}
+.fy27-net-val{font-family:var(--mono);font-size:32px;font-weight:300;letter-spacing:-.03em}
+.fy27-bar{height:6px;background:var(--bdr);border-radius:3px;overflow:hidden;margin-top:8px;margin-bottom:4px}
+.fy27-fill{height:100%;border-radius:3px;transition:width .4s,background .4s}
+
+/* LTV */
+.ltv-wrap{font-family:var(--sans)}
+.ltv-sb{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--radl);padding:14px;margin-bottom:14px}
+.ltv-sec{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--bdr)}
+input[type=number]{background:var(--sur2);border:1px solid var(--bdr);border-radius:var(--rad);padding:4px 7px;font-family:var(--mono);font-size:11px;color:var(--tx);width:88px;outline:none}
+input[type=number]:focus{border-color:var(--g);background:#fff}
+
+.view{display:none}.view.active{display:block}
+.stab-bar{display:flex;gap:0;border-bottom:2px solid var(--bdr);margin-bottom:14px}
+.stab{padding:7px 14px;font-size:11px;font-weight:500;cursor:pointer;color:var(--tx3);border-bottom:2px solid transparent;margin-bottom:-2px}
+.stab:hover{color:var(--tx)}
+.stab.active{color:var(--g);border-bottom-color:var(--g);font-weight:600}
+.stab-view{display:none}.stab-view.active{display:block}
+</style>
+</head>
+<body>
+
+<aside class="sb">
+  <div class="sbl">
+    <div class="org">William Jessup University</div>
+    <div class="ti">Strategic Budget Platform</div>
+    <div class="su">FY2027 Transformation Plan</div>
+  </div>
+  <div class="ns">
+    <div class="nsl">Analysis</div>
+    <div class="ni active" onclick="show('overview')"><span class="nd"></span>Overview</div>
+    <div class="ni" onclick="show('revenue')"><span class="nd"></span>Revenue & Enrollment</div>
+    <div class="ni" onclick="show('programs')"><span class="nd"></span>Programs & Margins</div>
+    <div class="ni alert" onclick="show('athletics')"><span class="nd"></span>Athletics Analysis</div>
+  </div>
+  <div class="ndiv"></div>
+  <div class="ns">
+    <div class="nsl">Planning</div>
+    <div class="ni" onclick="show('scenarios')"><span class="nd"></span>FY27 Scenario Model</div>
+    <div class="ni" onclick="show('ltv')"><span class="nd"></span>Student LTV Model</div>
+    <div class="ni" onclick="show('wasc')"><span class="nd"></span>WASC Readiness</div>
+  </div>
+  <div class="sf">
+    <div class="db">
+      <div class="dl">FY2025 Deficit</div>
+      <div class="dv">($9.8M)</div>
+      <div class="ds">↑ 17% from FY2024</div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="tb">
+    <div>
+      <div class="tb-ti" id="ptitle">Financial Overview</div>
+      <div class="tb-su" id="psub">FY2020–FY2025 actuals · FY2026–FY2027 projections</div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <span class="fbadge" id="fy27badge">FY27 Net: calculating…</span>
+      <span class="fbadge">FY2025 Base</span>
+    </div>
+  </div>
+  <div class="con">
+
+<!-- OVERVIEW -->
+<div class="view active" id="view-overview">
+  <div class="ab red"><div class="at">⚠ Financial Crisis — Accelerating Deficit</div>Expenses grew 44% ($34M→$49.3M) since FY2020; revenue grew only 10%. Institution moved from $1.95M surplus to $9.83M deficit in five years. Without structural intervention this triggers WSCUC Standard 3 financial viability review.</div>
+  <div class="kr">
+    <div class="kpi danger"><div class="kl">FY25 Deficit</div><div class="kv">($9.8M)</div><div class="ks">vs ($8.4M) FY24</div></div>
+    <div class="kpi"><div class="kl">FY25 Revenue</div><div class="kv">$39.5M</div><div class="ks">↑ 10% from FY20</div></div>
+    <div class="kpi danger"><div class="kl">FY25 Expenses</div><div class="kv">$49.3M</div><div class="ks">↑ 44% from FY20</div></div>
+    <div class="kpi amber"><div class="kl">Margin / Credit Hr</div><div class="kv">$347</div><div class="ks">↓ from $399 peak</div></div>
+    <div class="kpi"><div class="kl">Athletes / Students</div><div class="kv">23.9%</div><div class="ks">351 of 1,466</div></div>
+  </div>
+  <div class="g2">
+    <div class="card"><div class="ct">Revenue vs Expenses FY2020–FY2025</div><div style="position:relative;height:230px"><canvas id="c-overview"></canvas></div></div>
+    <div class="card"><div class="ct">Net Surplus / (Deficit) by Year</div><div style="position:relative;height:230px"><canvas id="c-deficit"></canvas></div></div>
+  </div>
+  <div class="card">
+    <div class="ct">Contribution Margin by School — FY2024</div>
+    <table>
+      <thead><tr><th>School</th><th class="r">Students</th><th class="r">Athletes</th><th class="r">Revenue</th><th class="r">Costs</th><th class="r">Margin</th><th class="r">Margin %</th><th>Rec.</th></tr></thead>
+      <tbody>
+        <tr><td class="lab">Business</td><td class="r">363</td><td class="r">93</td><td class="r pos">$5.0M</td><td class="r">$1.5M</td><td class="r pos">$3.5M</td><td class="r"><span class="pill pg">70.4%</span></td><td><span class="badge bg">Invest</span></td></tr>
+        <tr><td class="lab">Psychology</td><td class="r">243</td><td class="r">28</td><td class="r pos">$3.8M</td><td class="r">$1.2M</td><td class="r pos">$2.6M</td><td class="r"><span class="pill pg">68.2%</span></td><td><span class="badge bg">Invest</span></td></tr>
+        <tr><td class="lab">Natural & Applied Sciences</td><td class="r">350</td><td class="r">133</td><td class="r pos">$7.2M</td><td class="r">$3.2M</td><td class="r pos">$4.0M</td><td class="r"><span class="pill pg">55.6%</span></td><td><span class="badge bg">Grow</span></td></tr>
+        <tr><td class="lab">Theology & Leadership</td><td class="r">120</td><td class="r">18</td><td class="r">$1.2M</td><td class="r">$0.6M</td><td class="r">$0.6M</td><td class="r"><span class="pill pa">49.3%</span></td><td><span class="badge ba">Monitor</span></td></tr>
+        <tr><td class="lab">Humanities & Arts</td><td class="r">192</td><td class="r">55</td><td class="r">$3.2M</td><td class="r">$1.7M</td><td class="r">$1.5M</td><td class="r"><span class="pill pa">46.1%</span></td><td><span class="badge ba">Review</span></td></tr>
+        <tr><td class="lab">Education</td><td class="r">150</td><td class="r">30</td><td class="r">$2.0M</td><td class="r">$1.1M</td><td class="r">$0.9M</td><td class="r"><span class="pill pa">44.2%</span></td><td><span class="badge ba">Review</span></td></tr>
+        <tr class="tot"><td class="lab">Grand Total</td><td class="r">1,466</td><td class="r">351</td><td class="r">$22.7M</td><td class="r">$9.5M</td><td class="r pos">$13.2M</td><td class="r"><span class="pill pg">58.3%</span></td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- REVENUE -->
+<div class="view" id="view-revenue">
+  <div class="kr">
+    <div class="kpi"><div class="kl">FY24 Credit Hours</div><div class="kv">38,169</div><div class="ks">↓ 18% from 2016 peak</div></div>
+    <div class="kpi amber"><div class="kl">Gross $/Credit Hr</div><div class="kv">$1,006</div><div class="ks">↑ from $837 in 2018</div></div>
+    <div class="kpi danger"><div class="kl">Net $/Credit Hr</div><div class="kv">$595</div><div class="ks">↓ from $615 (FY21)</div></div>
+    <div class="kpi danger"><div class="kl">Margin $/Credit Hr</div><div class="kv">$347</div><div class="ks">↓ from $399 (FY20)</div></div>
+    <div class="kpi"><div class="kl">Discount Rate (impl.)</div><div class="kv">40.8%</div><div class="ks">Net / Gross per CH</div></div>
+  </div>
+  <div class="ab amber"><div class="at">📉 The Enrollment-Margin Squeeze</div>Credit hours dropped from 46,552 (2016) to 38,169 (2024) — 18% volume decline. Cost per credit hour rose 38% ($180→$248). Margin per CH fell $399→$347. Cost inflation is outrunning both enrollment and pricing power.</div>
+  <div class="g2">
+    <div class="card"><div class="ct">Credit Hours 2018–2024</div><div style="position:relative;height:210px"><canvas id="c-ch"></canvas></div></div>
+    <div class="card"><div class="ct">Per Credit Hour: Gross / Net / Cost / Margin</div><div style="position:relative;height:210px"><canvas id="c-perch"></canvas></div></div>
+  </div>
+  <div class="card">
+    <div class="ct">Delivery Format Contribution Margins — FY2024</div>
+    <table>
+      <thead><tr><th>Format</th><th class="r">Students</th><th class="r">Revenue</th><th class="r">Direct Cost</th><th class="r">Margin</th><th class="r">Margin %</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="lab">Grad In-Person (Loc B)</td><td class="r">173</td><td class="r">$1.65M</td><td class="r">$417K</td><td class="r pos">$1.24M</td><td class="r"><span class="pill pg">74.8%</span></td><td class="lab">CS 79% — star program</td></tr>
+        <tr><td class="lab">Sync Online (Grad)</td><td class="r">68</td><td class="r">$894K</td><td class="r">$257K</td><td class="r pos">$637K</td><td class="r"><span class="pill pg">71.3%</span></td><td class="lab">Counseling Psych dominant</td></tr>
+        <tr><td class="lab">Grad In-Person (Loc A)</td><td class="r">192</td><td class="r">$1.93M</td><td class="r">$813K</td><td class="r pos">$1.12M</td><td class="r"><span class="pill pg">57.9%</span></td><td class="lab">Counseling Psych strongest</td></tr>
+        <tr><td class="lab">Traditional Undergrad</td><td class="r">910</td><td class="r">$16.4M</td><td class="r">$7.0M</td><td class="r pos">$9.4M</td><td class="r"><span class="pill pg">57.6%</span></td><td class="lab">Core campus population</td></tr>
+        <tr><td class="lab">Online Async (Undergrad)</td><td class="r">143</td><td class="r">$1.03M</td><td class="r">$406K</td><td class="r pos">$625K</td><td class="r"><span class="pill pg">51.0%</span></td><td class="lab">CS &amp; Psych lead</td></tr>
+        <tr><td class="lab">Sync Online (Undergrad)</td><td class="r">38</td><td class="r">$279K</td><td class="r">$162K</td><td class="r pos">$117K</td><td class="r"><span class="pill pa">42.1%</span></td><td class="lab">Psychology, Business</td></tr>
+        <tr><td class="lab">Online Async (Grad)</td><td class="r">91</td><td class="r">$417K</td><td class="r">$386K</td><td class="r pos">$31K</td><td class="r"><span class="pill pa">40.0%</span></td><td class="lab">Kinesiology/Leadership drag</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- PROGRAMS -->
+<div class="view" id="view-programs">
+  <div class="ab green"><div class="at">✓ Invest & Market: High-Margin Programs</div>Computer Science UG (74%), Business (72%), Biology/Biblical Studies (71%), Psychology (68%), Counseling Psychology grad (69–75%), Kinesiology UG (64%). Graduate CS Location B at 79% is the highest-margin program.</div>
+  <div class="ab amber"><div class="at">⚠ Review / Restructure: Below 40% Margin</div>Music (11%), Theatre (23%), Nursing (24%), Online Kinesiology MA (-6%), Online Leadership MA (-7%), Online Education MA (5.5%). These require restructuring or teach-out planning.</div>
+  <div class="card"><div class="ct">Undergraduate In-Person — Contribution Margin Ranking</div><div style="position:relative;height:280px"><canvas id="c-ugprog"></canvas></div></div>
+  <div class="g2">
+    <div class="card">
+      <div class="ct">Graduate Programs by Margin</div>
+      <table>
+        <thead><tr><th>Program</th><th>Format</th><th class="r">Students</th><th class="r">Margin %</th><th>Rec.</th></tr></thead>
+        <tbody>
+          <tr><td class="lab">CS (Loc B)</td><td class="lab">In-Person</td><td class="r">125</td><td class="r"><span class="pill pg">79.2%</span></td><td><span class="badge bg">Grow</span></td></tr>
+          <tr><td class="lab">Counseling Psych (Sync)</td><td class="lab">Online Sync</td><td class="r">53</td><td class="r"><span class="pill pg">74.9%</span></td><td><span class="badge bg">Grow</span></td></tr>
+          <tr><td class="lab">Counseling Psych (Loc A)</td><td class="lab">In-Person</td><td class="r">102</td><td class="r"><span class="pill pg">68.3%</span></td><td><span class="badge bg">Grow</span></td></tr>
+          <tr><td class="lab">MBA (Loc B)</td><td class="lab">In-Person</td><td class="r">45</td><td class="r"><span class="pill pg">61.6%</span></td><td><span class="badge bg">Maintain</span></td></tr>
+          <tr><td class="lab">MBA (Loc A)</td><td class="lab">In-Person</td><td class="r">22</td><td class="r"><span class="pill pg">58.1%</span></td><td><span class="badge bg">Maintain</span></td></tr>
+          <tr><td class="lab">Teaching (Sync)</td><td class="lab">Online Sync</td><td class="r">15</td><td class="r"><span class="pill pa">47.4%</span></td><td><span class="badge ba">Monitor</span></td></tr>
+          <tr><td class="lab">Teaching (Loc A)</td><td class="lab">In-Person</td><td class="r">63</td><td class="r"><span class="pill pa">35.1%</span></td><td><span class="badge ba">Review</span></td></tr>
+          <tr><td class="lab">Education (Online)</td><td class="lab">Online</td><td class="r">23</td><td class="r"><span class="pill pr">5.5%</span></td><td><span class="badge br">Restructure</span></td></tr>
+          <tr><td class="lab">Kinesiology (Online)</td><td class="lab">Online</td><td class="r">13</td><td class="r"><span class="pill pr">-6.1%</span></td><td><span class="badge br">Close</span></td></tr>
+          <tr><td class="lab">Leadership (Online)</td><td class="lab">Online</td><td class="r">40</td><td class="r"><span class="pill pr">-7.4%</span></td><td><span class="badge br">Close</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="ct">Programs of the Future — FY27 Opportunity Areas</div>
+      <div class="ab green" style="margin-bottom:8px"><div class="at">High-Priority Launch / Expand</div>AI & Machine Learning certificate/degree, Healthcare Administration (rebrand), Cybersecurity, Online Nursing RN-BSN completion, Dual-enrollment expansion for early college credit.</div>
+      <table>
+        <thead><tr><th>Program</th><th class="r">Est. FY27 Students</th><th class="r">Est. Margin</th><th>Investment Req.</th></tr></thead>
+        <tbody>
+          <tr><td class="lab">AI / Data Science (Undergrad)</td><td class="r">60–100</td><td class="r"><span class="pill pg">70–75%</span></td><td class="lab">2 FTE faculty</td></tr>
+          <tr><td class="lab">Cybersecurity (Online Grad)</td><td class="r">40–60</td><td class="r"><span class="pill pg">72–78%</span></td><td class="lab">Platform + 1 FTE</td></tr>
+          <tr><td class="lab">CS Online Graduate (expand)</td><td class="r">+50 students</td><td class="r"><span class="pill pg">79%</span></td><td class="lab">Minimal (existing)</td></tr>
+          <tr><td class="lab">RN-BSN Completion Online</td><td class="r">50–80</td><td class="r"><span class="pill pa">45–55%</span></td><td class="lab">Accreditation review</td></tr>
+          <tr><td class="lab">Dual Enrollment Expansion</td><td class="r">+100 CH equiv.</td><td class="r"><span class="pill pa">40–50%</span></td><td class="lab">HS partnerships</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ATHLETICS -->
+<div class="view" id="view-athletics">
+  <div class="ab red"><div class="at">🚨 Full D2 Membership Achieved July 2025 — Exit Has Real Costs</div>6-year transition just completed. Exit triggers: NCAA Bylaw 3.3.3.5 (full re-entry process if ever returning); PacWest conference exit obligations; athletic scholarship tail costs (cannot cut for program elimination per Bylaw 15.3). FY27 clean savings limited — full savings not until FY28–29.</div>
+  <div class="kr">
+    <div class="kpi danger"><div class="kl">FY24 Athletics Net</div><div class="kv">($848K)</div><div class="ks">First negative year</div></div>
+    <div class="kpi"><div class="kl">Total Athletes</div><div class="kv">351</div><div class="ks">23.9% of enrollment</div></div>
+    <div class="kpi danger"><div class="kl">Men's Basketball</div><div class="kv">($443K)</div><div class="ks">Worst single sport</div></div>
+    <div class="kpi danger"><div class="kl">Women's Basketball</div><div class="kv">($265K)</div><div class="ks">2nd worst sport</div></div>
+    <div class="kpi amber"><div class="kl">Scholarship Tail</div><div class="kv">2–3 yrs</div><div class="ks">Cannot cancel mid-award</div></div>
+  </div>
+  <div class="g2">
+    <div class="card"><div class="ct">Athletics Contribution Margin Trend 2015–2024</div><div style="position:relative;height:210px"><canvas id="c-athtrd"></canvas></div></div>
+    <div class="card"><div class="ct">FY2024 By Sport — Sorted by Contribution</div><div style="position:relative;height:210px"><canvas id="c-sports"></canvas></div></div>
+  </div>
+  <div class="card">
+    <div class="ct">Sport-by-Sport FY2024 Detail</div>
+    <table>
+      <thead><tr><th>Sport</th><th class="r">Athletes</th><th class="r">Revenue</th><th class="r">Costs</th><th class="r">Net Contribution</th><th class="r">Per Athlete</th><th>Status</th></tr></thead>
+      <tbody id="sports-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SCENARIOS -->
+<div class="view" id="view-scenarios">
+  <div style="display:flex;gap:14px;align-items:flex-start">
+    <!-- Left: controls -->
+    <div style="flex:1;min-width:0">
+      <div class="stab-bar">
+        <div class="stab active" onclick="stab('ath',this)">Athletics</div>
+        <div class="stab" onclick="stab('prog',this)">Programs</div>
+        <div class="stab" onclick="stab('admin',this)">Admin & Ops</div>
+        <div class="stab" onclick="stab('enroll',this)">Enrollment Growth</div>
+      </div>
+
+      <!-- ATHLETICS TAB -->
+      <div class="stab-view active" id="stv-ath">
+        <div class="ab amber" style="margin-bottom:10px"><div class="at">Select Keep D2 / Limited / Eliminate per sport. "Limited" stops new recruiting (~25% cost savings). "Eliminate" saves operational costs but ~70% of athletes transfer, reducing tuition revenue. D2 exit costs are modeled separately below.</div></div>
+        <div class="card" style="padding:10px">
+          <table class="ctrl-table">
+            <thead><tr><th>Sport</th><th class="r">Athletes</th><th class="r">FY24 Net</th><th class="c" style="min-width:180px">FY27 Decision</th><th class="r">Op Savings</th><th class="r">Tuition Lost</th><th class="r">Net Impact</th></tr></thead>
+            <tbody id="ath-ctrl-tbody"></tbody>
+            <tfoot><tr class="tot"><td class="lab">Athletics Totals</td><td class="r" id="ath-tot-ath">351</td><td class="r neg">($848K)</td><td></td><td class="r pos" id="ath-tot-save">$0</td><td class="r neg" id="ath-tot-loss">$0</td><td class="r impact-cell" id="ath-tot-imp">$0</td></tr></tfoot>
+          </table>
+        </div>
+
+        <div class="card" style="border-left:3px solid var(--r)">
+          <div class="ct" style="color:var(--r)">D2 Exit — One-Time &amp; Tail Costs (if any sports eliminated)</div>
+          <div class="ab red" style="margin-bottom:10px;font-size:10px"><div class="at">These costs apply only if Jessup exits D2 membership entirely. Partial sport elimination within D2 does not trigger exit fees. Adjust each input to model your specific situation.</div></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div>
+              <div class="slrow" style="margin-bottom:6px">
+                <label>PacWest conference exit fee ($)</label>
+                <input type="number" id="d2-exit-fee" value="500000" min="0" max="3000000" step="50000" style="width:100px" oninput="updateAthTotals()">
+              </div>
+              <div class="slrow" style="margin-bottom:6px">
+                <label>Coaching contract severance — total ($)</label>
+                <input type="number" id="d2-severance" value="400000" min="0" max="2000000" step="50000" style="width:100px" oninput="updateAthTotals()">
+              </div>
+              <div class="slrow" style="margin-bottom:6px">
+                <label>Avg scholarship value / athlete / yr ($)</label>
+                <input type="number" id="d2-schol-val" value="8500" min="0" max="25000" step="500" style="width:100px" oninput="updateAthTotals()">
+              </div>
+              <div class="slrow">
+                <label>Avg remaining scholarship years</label>
+                <input type="number" id="d2-schol-yrs" value="2.1" min="0" max="4" step="0.1" style="width:100px" oninput="updateAthTotals()">
+              </div>
+            </div>
+            <div>
+              <table style="font-size:11px">
+                <thead><tr><th>Exit Cost Component</th><th class="r">Amount</th></tr></thead>
+                <tbody>
+                  <tr><td class="lab">Conference exit fee</td><td class="r neg" id="d2-c1">—</td></tr>
+                  <tr><td class="lab">Coaching severance</td><td class="r neg" id="d2-c2">—</td></tr>
+                  <tr><td class="lab">Scholarship tail (eliminated sports only)</td><td class="r neg" id="d2-c3">—</td></tr>
+                  <tr><td class="lab">NCAA compliance wind-down (est.)</td><td class="r neg">($50K)</td></tr>
+                  <tr class="tot"><td class="lab">Total One-Time Exit Cost (FY27)</td><td class="r neg" id="d2-total-exit">—</td></tr>
+                  <tr><td class="lab" style="color:var(--tx3);font-size:10px">Only applies if full D2 exit selected</td><td class="r" id="d2-applies" style="font-size:10px;color:var(--tx3)">—</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;border-top:1px solid var(--bdr);padding-top:10px">
+            <div>
+              <div style="font-size:10px;font-weight:600;color:var(--tx3);margin-bottom:2px">FY27 Net Athletics Impact (ops savings − tuition loss − exit costs)</div>
+              <div style="font-size:10px;color:var(--tx3)">Positive = net benefit to budget. Negative = net cost.</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-family:var(--mono);font-size:20px;font-weight:500" id="ath-net-final">—</div>
+              <div style="font-size:10px;color:var(--tx3)" id="ath-exit-note">No sports eliminated</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROGRAMS TAB -->
+      <div class="stab-view" id="stv-prog">
+        <div class="ab green" style="margin-bottom:10px"><div class="at">Set a growth rate % and strategy per program. Growth rate drives the enrollment delta automatically. You can also override the delta manually. Margin % × enrollment delta × avg net revenue per student = FY27 impact.</div></div>
+        <div class="card" style="padding:10px">
+          <table class="ctrl-table">
+            <thead><tr><th>Program</th><th class="r">Students</th><th class="r">Margin %</th><th class="r" style="min-width:70px">Growth %/yr</th><th class="r" style="min-width:60px">Enroll Δ</th><th class="c">Strategy</th><th class="r">FY27 Impact</th></tr></thead>
+            <tbody id="prog-ctrl-tbody"></tbody>
+            <tfoot><tr class="tot"><td class="lab">Programs Total Delta</td><td></td><td></td><td></td><td class="r" id="prog-tot-delta">0</td><td></td><td class="r impact-cell" id="prog-tot-imp">—</td></tr></tfoot>
+          </table>
+        </div>
+        <div class="card" style="padding:10px 14px">
+          <div class="ct">Global Growth Rate Presets</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="tog" onclick="applyGlobalGrowth(0)" style="padding:4px 12px;font-size:11px">All Maintain (0%)</button>
+            <button class="tog active-g" onclick="applyGlobalGrowth(null,'high')" style="padding:4px 12px;font-size:11px">High-margin: +15%, Low-margin: −10%</button>
+            <button class="tog" onclick="applyGlobalGrowth(5)" style="padding:4px 12px;font-size:11px">All Grow +5%</button>
+            <button class="tog" onclick="applyGlobalGrowth(10)" style="padding:4px 12px;font-size:11px">All Grow +10%</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN TAB -->
+      <div class="stab-view" id="stv-admin">
+        <div class="ab amber" style="margin-bottom:10px"><div class="at">Admin represents ~$8.2M of expenses. Adjust reduction targets per department. AI-enabled efficiency tools can reduce headcount needs without service degradation.</div></div>
+        <div class="card">
+          <div class="ct">Admin Cost Reduction Targets</div>
+          <div id="admin-sliders"></div>
+          <div style="border-top:1px solid var(--bdr);padding-top:10px;margin-top:6px;display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:11px;font-weight:600;color:var(--tx2)">Total Admin Savings (FY27)</span>
+            <span class="impact-cell pos" id="admin-tot">$0</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ct">AI Capability Investment — Cost Offset</div>
+          <div class="slrow"><label>CRM / Enrollment AI platform ($)</label><input type="range" min="0" max="500000" step="25000" value="150000" oninput="updateAdmin()"><span class="slval" id="ai-cost-v">$150K</span></div>
+          <div class="slrow"><label>Advising AI chatbot / automation ($)</label><input type="range" min="0" max="200000" step="10000" value="50000" oninput="updateAdmin()"><span class="slval" id="ai-adv-v">$50K</span></div>
+          <div class="slrow"><label>Institutional research / reporting AI ($)</label><input type="range" min="0" max="150000" step="10000" value="30000" oninput="updateAdmin()"><span class="slval" id="ai-ir-v">$30K</span></div>
+          <div style="border-top:1px solid var(--bdr);padding-top:8px;margin-top:4px;display:flex;justify-content:space-between">
+            <span style="font-size:11px;color:var(--tx3)">Total AI Investment (offsets some savings)</span>
+            <span class="impact-cell neg" id="ai-tot">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ENROLLMENT TAB -->
+      <div class="stab-view" id="stv-enroll">
+        <div class="ab green" style="margin-bottom:10px"><div class="at">Set enrollment growth targets by channel. Each channel has a distinct margin profile. Growth also requires recruitment investment — adjust the cost per enrolled student.</div></div>
+        <div class="card">
+          <div class="ct">Enrollment Growth by Channel</div>
+          <div id="enroll-sliders"></div>
+        </div>
+        <div class="card">
+          <div class="ct">Recruitment Cost Assumptions</div>
+          <div class="slrow"><label>Cost per enrolled traditional student ($)</label><input type="range" min="1500" max="8000" step="100" value="2800" oninput="updateEnroll()"><span class="slval" id="cpe-trad-v">$2,800</span></div>
+          <div class="slrow"><label>Cost per enrolled online student ($)</label><input type="range" min="500" max="3000" step="100" value="1200" oninput="updateEnroll()"><span class="slval" id="cpe-online-v">$1,200</span></div>
+          <div style="border-top:1px solid var(--bdr);padding-top:8px;margin-top:4px;display:flex;justify-content:space-between">
+            <span style="font-size:11px;color:var(--tx3)">Net enrollment revenue impact (after recruitment cost)</span>
+            <span class="impact-cell pos" id="enroll-tot">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: live P&L -->
+    <div style="width:280px;flex-shrink:0">
+      <div class="card" style="border-left:3px solid var(--g);position:sticky;top:0">
+        <div class="ct">FY27 Projected P&L</div>
+        <table style="margin-bottom:10px">
+          <thead><tr><th>Line</th><th class="r">FY25</th><th class="r">FY27</th></tr></thead>
+          <tbody>
+            <tr><td class="lab">Net Tuition</td><td class="r">$33.2M</td><td class="r" id="pl-tuition">—</td></tr>
+            <tr><td class="lab">Aux / R&B</td><td class="r">$4.2M</td><td class="r">$4.4M</td></tr>
+            <tr><td class="lab">Gifts & Grants</td><td class="r">$2.1M</td><td class="r">$2.3M</td></tr>
+            <tr class="tot"><td class="lab">Total Revenue</td><td class="r">$39.5M</td><td class="r" id="pl-rev">—</td></tr>
+            <tr><td class="lab">Instruction</td><td class="r">$18.1M</td><td class="r" id="pl-instr">—</td></tr>
+            <tr><td class="lab">Student Services</td><td class="r">$5.2M</td><td class="r">$5.3M</td></tr>
+            <tr><td class="lab">Administration</td><td class="r">$8.2M</td><td class="r" id="pl-admin">—</td></tr>
+            <tr><td class="lab">Athletics</td><td class="r">$6.4M</td><td class="r" id="pl-ath">—</td></tr>
+            <tr><td class="lab">Facilities & Debt</td><td class="r">$7.2M</td><td class="r">$7.3M</td></tr>
+            <tr class="tot"><td class="lab">Total Expenses</td><td class="r">$49.3M</td><td class="r" id="pl-exp">—</td></tr>
+          </tbody>
+        </table>
+        <div class="fy27box">
+          <div style="width:100%">
+            <div class="fy27-net-label">FY27 Net</div>
+            <div class="fy27-net-val" id="pl-net">—</div>
+            <div class="fy27-bar"><div class="fy27-fill" id="pl-bar" style="width:0%"></div></div>
+            <div style="font-size:10px;color:var(--tx3)" id="pl-pct">vs ($9.83M) baseline</div>
+          </div>
+        </div>
+        <div style="font-size:10px;color:var(--tx2);margin-top:10px;line-height:1.6" id="pl-assess">Select options on the left to model FY27 outcomes.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LTV -->
+<div class="view" id="view-ltv">
+  <div class="ltv-wrap">
+    <div class="ab amber"><div class="at">Jessup-Calibrated Defaults</div>$42K gross tuition · 41% discount rate · 78% Y1→Y2 retention · $2,800 recruitment cost · Alumni giving 14% participation. Adjust any variable to model FY27 cohort economics.</div>
+    <div style="display:flex;gap:14px">
+      <div style="width:240px;flex-shrink:0">
+        <div class="ltv-sb">
+          <div class="ltv-sec">Enrollment & Pricing</div>
+          <div class="slrow"><label>Class size</label><input type="number" id="l-class" value="250" min="50" max="1000" oninput="ltvCalc()"></div>
+          <div class="slrow"><label>Gross tuition</label><input type="number" id="l-tuition" value="42000" min="20000" max="70000" step="500" oninput="ltvCalc()"></div>
+          <div class="slrow"><label>Discount rate</label><span class="slval" id="l-dr-v">41%</span></div>
+          <input type="range" id="l-dr" min="20" max="65" value="41" step="1" style="width:100%;accent-color:var(--g);margin-bottom:10px" oninput="ltvCalc()">
+          <div class="slrow"><label>R&B net / student</label><input type="number" id="l-rnb" value="8500" min="0" max="20000" step="500" oninput="ltvCalc()"></div>
+          <div class="slrow"><label>Fees / student</label><input type="number" id="l-fees" value="1200" min="0" max="5000" step="100" oninput="ltvCalc()"></div>
+        </div>
+        <div class="ltv-sb">
+          <div class="ltv-sec">Retention by Year</div>
+          <div class="slrow"><label>Y1→Y2</label><span class="slval" id="l-r1-v">78%</span></div>
+          <input type="range" id="l-r1" min="50" max="98" value="78" step="1" style="width:100%;accent-color:var(--g);margin-bottom:8px" oninput="ltvCalc()">
+          <div class="slrow"><label>Y2→Y3</label><span class="slval" id="l-r2-v">86%</span></div>
+          <input type="range" id="l-r2" min="50" max="99" value="86" step="1" style="width:100%;accent-color:var(--g);margin-bottom:8px" oninput="ltvCalc()">
+          <div class="slrow"><label>Y3→Y4</label><span class="slval" id="l-r3-v">92%</span></div>
+          <input type="range" id="l-r3" min="50" max="99" value="92" step="1" style="width:100%;accent-color:var(--g);margin-bottom:8px" oninput="ltvCalc()">
+        </div>
+        <div class="ltv-sb">
+          <div class="ltv-sec">Costs</div>
+          <div class="slrow"><label>Recruit cost / student</label><input type="number" id="l-recruit" value="2800" min="500" max="15000" step="100" oninput="ltvCalc()"></div>
+          <div class="slrow"><label>Operating cost / student</label><input type="number" id="l-opcost" value="32000" min="10000" max="80000" step="500" oninput="ltvCalc()"></div>
+        </div>
+        <div class="ltv-sb">
+          <div class="ltv-sec">Alumni Giving</div>
+          <div class="slrow"><label>Participation rate</label><span class="slval" id="l-grate-v">14%</span></div>
+          <input type="range" id="l-grate" min="5" max="50" value="14" step="1" style="width:100%;accent-color:var(--g);margin-bottom:8px" oninput="ltvCalc()">
+          <div class="slrow"><label>Avg annual gift</label><input type="number" id="l-gift" value="450" min="50" max="5000" step="50" oninput="ltvCalc()"></div>
+          <div class="slrow"><label>Giving years modeled</label><span class="slval" id="l-gyrs-v">20</span></div>
+          <input type="range" id="l-gyrs" min="5" max="40" value="20" step="5" style="width:100%;accent-color:var(--g)" oninput="ltvCalc()">
+        </div>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div class="kr" style="grid-template-columns:repeat(4,minmax(0,1fr))">
+          <div class="kpi success"><div class="kl">LTV per Student</div><div class="kv" id="l-ltv">—</div><div class="ks">Net 4yr + alumni</div></div>
+          <div class="kpi"><div class="kl">Cohort Revenue (4yr)</div><div class="kv" id="l-crev">—</div><div class="ks">Tuition+R&B+fees</div></div>
+          <div class="kpi danger"><div class="kl">Cohort Cost (4yr)</div><div class="kv" id="l-ccost">—</div><div class="ks">Ops + recruit</div></div>
+          <div class="kpi amber"><div class="kl">LTV:CAC Ratio</div><div class="kv" id="l-ratio">—</div><div class="ks">Target ≥ 3.0×</div></div>
+        </div>
+        <div class="g2">
+          <div class="card"><div class="ct">Cohort Attrition</div><div style="position:relative;height:200px"><canvas id="l-c-ret"></canvas></div></div>
+          <div class="card"><div class="ct">Revenue vs Op Cost / Student / Year</div><div style="position:relative;height:200px"><canvas id="l-c-rev"></canvas></div></div>
+        </div>
+        <div class="card"><div class="ct">Cumulative Cohort Net Position</div><div style="position:relative;height:160px"><canvas id="l-c-cumul"></canvas></div></div>
+        <div class="card">
+          <div class="ct">LTV Composition per Enrolled Student</div>
+          <table>
+            <thead><tr><th>Component</th><th class="r">Value</th><th class="r">Notes</th></tr></thead>
+            <tbody id="l-ltv-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WASC -->
+<div class="view" id="view-wasc">
+  <div class="kr">
+    <div class="kpi danger"><div class="kl">Standard 3 Status</div><div class="kv">At Risk</div><div class="ks">Accelerating deficits</div></div>
+    <div class="kpi amber"><div class="kl">Action Required</div><div class="kv">FY26 Plan</div><div class="ks">3-year plan needed</div></div>
+    <div class="kpi"><div class="kl">Teach-Out Notice</div><div class="kv">90 Days</div><div class="ks">Before implementation</div></div>
+    <div class="kpi"><div class="kl">Board Resolution</div><div class="kv">Required</div><div class="ks">Any program closure</div></div>
+    <div class="kpi amber"><div class="kl">D2 Exit Impact on WASC</div><div class="kv">Negative</div><div class="ks">Signals distress if done reactively</div></div>
+  </div>
+  <div class="g2">
+    <div>
+      <div style="font-size:12px;font-weight:600;margin-bottom:8px">WSCUC Standard 3 — CFR Compliance</div>
+      <div class="card" style="padding:10px;margin-bottom:8px;display:flex;gap:10px">
+        <div style="width:26px;height:26px;border-radius:50%;background:var(--rl);color:var(--r);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0">✗</div>
+        <div><div style="font-size:11px;font-weight:600">CFR 3.1 — Financial Sustainability</div><div style="font-size:10px;color:var(--tx3);line-height:1.6;margin-top:2px">4 consecutive deficit years growing ($5.2M) → ($9.8M). WSCUC will flag this as a Standard 3 violation without a documented turnaround plan.</div><div style="font-size:10px;color:var(--am);margin-top:4px;font-weight:600">→ Board-approved 3-year plan with milestones required</div></div>
+      </div>
+      <div class="card" style="padding:10px;margin-bottom:8px;display:flex;gap:10px">
+        <div style="width:26px;height:26px;border-radius:50%;background:var(--rl);color:var(--r);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0">✗</div>
+        <div><div style="font-size:11px;font-weight:600">CFR 3.3 — Financial Management</div><div style="font-size:10px;color:var(--tx3);line-height:1.6;margin-top:2px">Expenses growing 44% vs revenue 10%. Cost structure not aligned with revenue capacity.</div><div style="font-size:10px;color:var(--am);margin-top:4px;font-weight:600">→ Independent financial audit; CFO-led expense benchmarking</div></div>
+      </div>
+      <div class="card" style="padding:10px;margin-bottom:8px;display:flex;gap:10px">
+        <div style="width:26px;height:26px;border-radius:50%;background:var(--al);color:var(--am);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0">!</div>
+        <div><div style="font-size:11px;font-weight:600">CFR 3.4 — Strategic Planning Integration</div><div style="font-size:10px;color:var(--tx3);line-height:1.6;margin-top:2px">This transformation plan directly addresses the requirement for strategic planning linked to financial projections.</div><div style="font-size:10px;color:var(--am);margin-top:4px;font-weight:600">→ Document board oversight records and planning process</div></div>
+      </div>
+      <div class="card" style="padding:10px;margin-bottom:8px;display:flex;gap:10px">
+        <div style="width:26px;height:26px;border-radius:50%;background:var(--al);color:var(--am);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0">!</div>
+        <div><div style="font-size:11px;font-weight:600">CFR 3.6 — Reserves & Liquidity</div><div style="font-size:10px;color:var(--tx3);line-height:1.6;margin-top:2px">Multnomah acquisition debt (closed May 2025) may impact liquidity. Days cash on hand is a key metric WSCUC will request.</div><div style="font-size:10px;color:var(--am);margin-top:4px;font-weight:600">→ Provide current DCOH and debt service coverage ratio to WSCUC VP</div></div>
+      </div>
+      <div class="card" style="padding:10px;display:flex;gap:10px">
+        <div style="width:26px;height:26px;border-radius:50%;background:var(--gl);color:var(--g);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0">✓</div>
+        <div><div style="font-size:11px;font-weight:600">CFR 3.7 — Program Review Evidence</div><div style="font-size:10px;color:var(--tx3);line-height:1.6;margin-top:2px">The program margin simulator (by school, program, format, credit hour) directly fulfills WSCUC's expectation for evidence-based program review.</div><div style="font-size:10px;color:var(--g);margin-top:4px;font-weight:600">→ Strength: reformat simulator output as WSCUC program review documentation</div></div>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:12px;font-weight:600;margin-bottom:8px">3-Year Business Model Narrative (FY26–FY28)</div>
+      <div class="card" style="margin-bottom:8px"><div style="font-size:11px;font-weight:600;color:var(--r);margin-bottom:6px">Year 1 — FY26: Stabilize</div><div style="font-size:10px;color:var(--tx3);line-height:1.8">• Board approves financial transformation plan with board resolution<br>• Implement admin reorganization + AI tools (target $1.6M–$2M savings)<br>• Stop admissions to negative-margin programs (Kinesiology/Leadership online)<br>• If athletics exit: announce, begin PacWest conference notice period<br>• WSCUC: Submit interim financial report demonstrating plan<br><strong style="color:var(--am)">Target: Reduce deficit to ($5M–$6M)</strong></div></div>
+      <div class="card" style="margin-bottom:8px"><div style="font-size:11px;font-weight:600;color:var(--am);margin-bottom:6px">Year 2 — FY27: Transform</div><div style="font-size:10px;color:var(--tx3);line-height:1.8">• Full admin restructure savings realized<br>• Targeted enrollment growth (CS, Business, Psych, online grad) begins<br>• Teach-out programs at reduced cost; no new admissions<br>• Athletics: final competitive year (if exiting) or restructured portfolio<br>• New program launches: AI/Data Science, Cybersecurity, RN-BSN<br><strong style="color:var(--g)">Target: Near break-even or ($1M–$2M)</strong></div></div>
+      <div class="card"><div style="font-size:11px;font-weight:600;color:var(--g);margin-bottom:6px">Year 3 — FY28: Growth</div><div style="font-size:10px;color:var(--tx3);line-height:1.8">• Return to operating surplus<br>• Full savings from FY26 decisions now fully reflected<br>• WSCUC reaffirmation: demonstrate sustained improvement trajectory<br>• Begin building financial reserves (target 60+ days cash)<br>• Alumni giving program expansion on improved enrollment outcomes<br><strong style="color:var(--g)">Target: $1M–$3M surplus</strong></div></div>
+    </div>
+  </div>
+</div>
+
+  </div><!-- /con -->
+</div><!-- /main -->
+
+<script>
+// ============ DATA ============
+const IS={years:[2020,2021,2022,2023,2024,2025],rev:[36025555,35480758,34859502,35003500,35872903,39479602],exp:[34078765,35045594,40024335,39060011,44300360,49311565]};
+const CH={years:[2018,2019,2020,2021,2022,2023,2024],gross:[837,888,932,973,985,983,1006],net:[529,555,580,615,605,596,595],cost:[180,175,181,218,223,233,248],margin:[349,380,399,397,382,362,347],ch:[42561,46552,46391,43116,39268,37602,38169]};
+const ATH_TREND={years:[2015,2016,2017,2018,2019,2020,2021,2022,2023,2024],total:[797027,855140,1016964,652295,652886,826932,1194900,521107,232232,-847907]};
+const UGPROG=[
+  {p:"Computer Science",pct:.742,st:23},{p:"Business",pct:.720,st:141},{p:"Biology",pct:.711,st:130},
+  {p:"Biblical Studies",pct:.711,st:25},{p:"Psychology",pct:.687,st:76},{p:"Kinesiology",pct:.643,st:50},
+  {p:"Criminal Justice",pct:.613,st:39},{p:"Mathematics",pct:.651,st:14},{p:"Exercise Science",pct:.623,st:30},
+  {p:"Aviation",pct:.409,st:25},{p:"Liberal Studies",pct:.513,st:79},{p:"Leadership",pct:.468,st:24},
+  {p:"English",pct:.401,st:17},{p:"Nursing",pct:.245,st:75},{p:"Theatre",pct:.234,st:24},{p:"Music",pct:.108,st:28}
+];
+const SPORTS_DATA=[
+  {s:"Men's Basketball",a:19,r:64989,c:507668,m:-442720},
+  {s:"Women's Basketball",a:20,r:240586,c:505770,m:-265271},
+  {s:"Women's Volleyball",a:19,r:228065,c:389150,m:-161444},
+  {s:"Women's Softball",a:20,r:300201,c:417619,m:-117568},
+  {s:"Men's Baseball",a:58,r:788621,c:894273,m:-106635},
+  {s:"Women's Tennis",a:9,r:117465,c:149014,m:-31567},
+  {s:"Women's Soccer",a:28,r:450453,c:480161,m:-29993},
+  {s:"Women's Golf",a:10,r:124423,c:149478,m:-25707},
+  {s:"Men's Cross Country",a:7,r:45359,c:58556,m:-14529},
+  {s:"Women's Cross Country",a:6,r:28544,c:35425,m:-6893},
+  {s:"Women's IT&F",a:14,r:98499,c:102745,m:-4334},
+  {s:"Men's Tennis",a:12,r:198427,c:199226,m:-1138},
+  {s:"Men's Golf",a:16,r:247073,c:243941,m:2903},
+  {s:"Women's JV Basketball",a:2,r:23736,c:20550,m:3182},
+  {s:"Men's Track",a:20,r:263382,c:258299,m:3699},
+  {s:"Women's JV Volleyball",a:5,r:81518,c:71374,m:10127},
+  {s:"Men's Soccer",a:34,r:497796,c:489995,m:7689},
+  {s:"Women's OT&F",a:16,r:144474,c:132070,m:12289},
+  {s:"JV Men's Basketball",a:12,r:198928,c:143316,m:55431},
+  {s:"Women's Stunt",a:42,r:744873,c:643061,m:101660},
+  {s:"JV Men's Baseball",a:15,r:306159,c:143225,m:162912},
+];
+// state: 0=Keep D2, 1=Keep Limited(no recruit), 2=Eliminate
+const athState=SPORTS_DATA.map(()=>0);
+// programs: 0=Close, 1=Reduce, 2=Maintain, 3=Grow+10%, 4=Grow+20%
+const ALL_PROGS=[
+  {p:"Business (UG)",pct:.72,st:141,type:'trad'},{p:"Biology (UG)",pct:.711,st:130,type:'trad'},
+  {p:"Psychology (UG)",pct:.687,st:76,type:'trad'},{p:"Kinesiology (UG)",pct:.643,st:50,type:'trad'},
+  {p:"Computer Science (UG)",pct:.742,st:23,type:'trad'},{p:"Nursing (UG)",pct:.245,st:75,type:'trad'},
+  {p:"Music (UG)",pct:.108,st:28,type:'trad'},{p:"Theatre (UG)",pct:.234,st:24,type:'trad'},
+  {p:"CS Grad (Loc B)",pct:.792,st:125,type:'grad'},{p:"Counseling Psych (Grad)",pct:.683,st:102,type:'grad'},
+  {p:"MBA",pct:.598,st:67,type:'grad'},{p:"Teaching Grad",pct:.351,st:63,type:'grad'},
+  {p:"Theology/Leadership",pct:.493,st:120,type:'theo'},
+  {p:"Online Psychology (UG)",pct:.665,st:42,type:'online'},{p:"Online Business (UG)",pct:.628,st:42,type:'online'},
+  {p:"Online CS (UG)",pct:.677,st:21,type:'online'},{p:"Online Education (Grad)",pct:.055,st:23,type:'online'},
+  {p:"Online Kinesiology (Grad)",pct:-.061,st:13,type:'online'},{p:"Online Leadership (Grad)",pct:-.074,st:40,type:'online'},
+];
+const progState=ALL_PROGS.map(()=>2);
+const ADMIN_DEPTS=[
+  {name:"Enrollment Management",base:1800000,sl:0},
+  {name:"Financial Aid Office",base:900000,sl:0},
+  {name:"Marketing & Communications",base:700000,sl:0},
+  {name:"IT & Systems",base:1200000,sl:0},
+  {name:"HR & Compliance",base:600000,sl:0},
+  {name:"Executive/President's Office",base:550000,sl:0},
+  {name:"Business Office / Finance",base:750000,sl:0},
+  {name:"Other Administrative",base:700000,sl:0},
+];
+const ENROLL_CHANNELS=[
+  {name:"Traditional Undergrad",netPerStudent:13200,currentStudents:910,base:0},
+  {name:"Online Undergrad",netPerStudent:7200,currentStudents:143,base:0},
+  {name:"Graduate In-Person",netPerStudent:10100,currentStudents:365,base:0},
+  {name:"Online Graduate",netPerStudent:4600,currentStudents:91,base:0},
+  {name:"Synchronous Online",netPerStudent:11000,currentStudents:107,base:0},
+];
+
+// ============ HELPERS ============
+const C={};
+function mkChart(id,cfg){
+  if(typeof Chart==='undefined')return;
+  const el=document.getElementById(id);
+  if(!el)return;
+  try{if(C[id])C[id].destroy();}catch(e){}
+  try{C[id]=new Chart(el,cfg);}catch(e){console.warn('Chart error:',id,e);}
+}
+function fmtM(n,dec=1){const a=Math.abs(n);const s=n<0?'(':'',e=n<0?')':'';return s+'$'+(a/1e6).toFixed(dec)+'M'+e;}
+function fmtK(n){const a=Math.abs(n);const s=n<0?'(':'' ,e=n<0?')':'';return s+'$'+Math.round(a/1000)+'K'+e;}
+function fmtD(n){return (n<0?'(':'')+'$'+Math.abs(n).toLocaleString('en-US',{maximumFractionDigits:0})+(n<0?')':'');}
+const G='#1f6b3a',GL='rgba(31,107,58,.12)',R='#b91c1c',RL='rgba(185,28,28,.12)',AM='#b45309',BL='#1d4ed8';
+
+// ============ CHARTS ============
+function initCharts(){
+  // Overview
+  mkChart('c-overview',{type:'line',data:{labels:IS.years,datasets:[
+    {label:'Revenue',data:IS.rev.map(v=>+(v/1e6).toFixed(2)),borderColor:G,backgroundColor:GL,fill:true,tension:.3,pointRadius:4},
+    {label:'Expenses',data:IS.exp.map(v=>+(v/1e6).toFixed(2)),borderColor:R,backgroundColor:RL,fill:true,tension:.3,pointRadius:4}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>'$'+v+'M',font:{family:'DM Mono',size:10}},grid:{color:'#f0ede6'}},x:{ticks:{font:{family:'DM Sans',size:11}},grid:{display:false}}}}});
+  const nets=IS.rev.map((r,i)=>+((r-IS.exp[i])/1e6).toFixed(2));
+  mkChart('c-deficit',{type:'bar',data:{labels:IS.years,datasets:[{data:nets,backgroundColor:nets.map(v=>v>=0?G:R),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' $'+c.raw+'M'}}},scales:{y:{ticks:{callback:v=>'$'+v+'M',font:{family:'DM Mono',size:10}},grid:{color:'#f0ede6'}},x:{ticks:{font:{family:'DM Sans',size:11}},grid:{display:false}}}}});
+  // Revenue
+  mkChart('c-ch',{type:'line',data:{labels:CH.years,datasets:[{data:CH.ch,borderColor:BL,tension:.3,pointRadius:4,fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v.toLocaleString(),font:{family:'DM Mono',size:10}},grid:{color:'#f0ede6'}},x:{ticks:{font:{family:'DM Sans',size:11}},grid:{display:false}}}}});
+  mkChart('c-perch',{type:'line',data:{labels:CH.years,datasets:[
+    {label:'Gross',data:CH.gross,borderColor:'#9ca3af',tension:.3,pointRadius:3,borderDash:[4,3]},
+    {label:'Net',data:CH.net,borderColor:BL,tension:.3,pointRadius:3},
+    {label:'Cost',data:CH.cost,borderColor:R,tension:.3,pointRadius:3},
+    {label:'Margin',data:CH.margin,borderColor:G,tension:.3,pointRadius:3,borderWidth:2}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>'$'+v,font:{family:'DM Mono',size:10}},grid:{color:'#f0ede6'}},x:{ticks:{font:{family:'DM Sans',size:11}},grid:{display:false}}}}});
+  // Programs
+  const sp=[...UGPROG].sort((a,b)=>b.pct-a.pct);
+  mkChart('c-ugprog',{type:'bar',data:{labels:sp.map(p=>p.p),datasets:[{data:sp.map(p=>Math.round(p.pct*100)),backgroundColor:sp.map(p=>p.pct>=.6?G:p.pct>=.4?AM:R),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.raw+'% margin'}}},scales:{x:{ticks:{callback:v=>v+'%',font:{family:'DM Mono',size:10}},grid:{color:'#f0ede6'}},y:{ticks:{font:{family:'DM Sans',size:10}},grid:{display:false}}}}});
+  // Athletics
+  mkChart('c-athtrd',{type:'bar',data:{labels:ATH_TREND.years,datasets:[{data:ATH_TREND.total.map(v=>Math.round(v/1000)),backgroundColor:ATH_TREND.total.map(v=>v>=0?G:R),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' $'+c.raw+'K'}}},scales:{y:{ticks:{callback:v=>'$'+v+'K',font:{family:'DM Mono',size:10}},grid:{color:'#f0ede6'}},x:{ticks:{font:{family:'DM Sans',size:11}},grid:{display:false}}}}});
+  const ss=[...SPORTS_DATA].sort((a,b)=>a.m-b.m);
+  mkChart('c-sports',{type:'bar',data:{labels:ss.map(s=>s.s.length>16?s.s.slice(0,15)+'…':s.s),datasets:[{data:ss.map(s=>Math.round(s.m/1000)),backgroundColor:ss.map(s=>s.m>=0?G:R),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' $'+c.raw+'K'}}},scales:{x:{ticks:{callback:v=>'$'+v+'K',font:{family:'DM Mono',size:10}},grid:{color:'#f0ede6'}},y:{ticks:{font:{family:'DM Sans',size:9}},grid:{display:false}}}}});
+}
+
+function buildSportsTable(){
+  const ss=[...SPORTS_DATA].sort((a,b)=>a.m-b.m);
+  document.getElementById('sports-tbody').innerHTML=ss.map(s=>{
+    const cls=s.m>0?'pos':'neg';
+    const action=s.m>50000?'<span class="badge bg">Keep</span>':s.m>0?'<span class="badge bb">Monitor</span>':s.m>-20000?'<span class="badge ba">Review</span>':'<span class="badge br">Restructure</span>';
+    return `<tr><td class="lab">${s.s}</td><td class="r">${s.a}</td><td class="r">$${(s.r/1e3).toFixed(0)}K</td><td class="r">$${(s.c/1e3).toFixed(0)}K</td><td class="r ${cls}">${fmtK(s.m)}</td><td class="r ${cls}">${fmtK(s.m/s.a)}</td><td>${action}</td></tr>`;
+  }).join('');
+}
+
+// ============ ATHLETICS CONTROLS ============
+function buildAthCtrl(){
+  const tbody=document.getElementById('ath-ctrl-tbody');
+  const sorted=[...SPORTS_DATA].map((s,i)=>({...s,oi:i})).sort((a,b)=>a.m-b.m);
+  tbody.innerHTML=sorted.map((s)=>{
+    const i=s.oi;
+    return `<tr>
+      <td class="lab" style="font-size:10px">${s.s}</td>
+      <td class="r">${s.a}</td>
+      <td class="r ${s.m>=0?'pos':'neg'}">${fmtK(s.m)}</td>
+      <td class="c">
+        <div class="tog-group">
+          <button class="tog ${athState[i]===0?'active-b':''}" onclick="setAth(${i},0,this)">Keep D2</button>
+          <button class="tog ${athState[i]===1?'active-a':''}" onclick="setAth(${i},1,this)">Limited</button>
+          <button class="tog ${athState[i]===2?'active-r':''}" onclick="setAth(${i},2,this)">Eliminate</button>
+        </div>
+      </td>
+      <td class="r pos" id="ath-save-${i}" style="font-size:10px">—</td>
+      <td class="r neg" id="ath-loss-${i}" style="font-size:10px">—</td>
+      <td class="r impact-cell" id="ath-imp-${i}">—</td>
+    </tr>`;
+  }).join('');
+  updateAthTotals();
+}
+
+function setAth(i,val,btn){
+  athState[i]=val;
+  // Update toggle buttons in same row
+  const btns=btn.parentElement.querySelectorAll('.tog');
+  btns[0].className='tog'+(val===0?' active-b':'');
+  btns[1].className='tog'+(val===1?' active-a':'');
+  btns[2].className='tog'+(val===2?' active-r':'');
+  updateAthTotals();
+  updatePL();
+}
+
+function athImpact(sport,state){
+  const netTuitionPerAthlete=sport.r/sport.a;
+  if(state===0) return {save:0,loss:0,net:0};
+  if(state===1){
+    const save=sport.c*0.25;
+    return {save,loss:0,net:save};
+  }
+  if(state===2){
+    const save=sport.c;
+    const loss=netTuitionPerAthlete*sport.a*0.70;
+    return {save,loss,net:save-loss};
+  }
+  return {save:0,loss:0,net:0};
+}
+
+function getD2ExitInputs(){
+  const fee=parseFloat(document.getElementById('d2-exit-fee')?.value||500000);
+  const sev=parseFloat(document.getElementById('d2-severance')?.value||400000);
+  const scholVal=parseFloat(document.getElementById('d2-schol-val')?.value||8500);
+  const scholYrs=parseFloat(document.getElementById('d2-schol-yrs')?.value||2.1);
+  return {fee,sev,scholVal,scholYrs};
+}
+
+function updateAthTotals(){
+  let totalAthletes=0,totalSave=0,totalLoss=0,totalNet=0;
+  let eliminatedAthletes=0,anyEliminated=false;
+
+  SPORTS_DATA.forEach((s,i)=>{
+    const imp=athImpact(s,athState[i]);
+    totalSave+=imp.save; totalLoss+=imp.loss; totalNet+=imp.net;
+    if(athState[i]!==2) totalAthletes+=s.a;
+    else {eliminatedAthletes+=s.a; anyEliminated=true;}
+
+    const el=document.getElementById('ath-imp-'+i);
+    if(el){
+      el.textContent=imp.net===0?'$0':fmtK(imp.net);
+      el.className='impact-cell '+(imp.net>0?'pos':imp.net<0?'neg':'');
+    }
+    const saveEl=document.getElementById('ath-save-'+i);
+    const lossEl=document.getElementById('ath-loss-'+i);
+    if(saveEl) saveEl.textContent=imp.save>0?fmtK(imp.save):'—';
+    if(lossEl) lossEl.textContent=imp.loss>0?'('+fmtK(imp.loss).replace('(',''):'—';
+  });
+
+  // D2 exit costs (only if full exit — more than 15 sports eliminated)
+  const exitInputs=getD2ExitInputs();
+  const eliminatedSports=athState.filter(s=>s===2).length;
+  const isFullExit=eliminatedSports>=15;
+  const exitFee=isFullExit?exitInputs.fee:0;
+  const severance=isFullExit?exitInputs.sev:0;
+  const scholarshipTail=eliminatedAthletes*exitInputs.scholVal*exitInputs.scholYrs;
+  const totalExitCost=isFullExit?exitFee+severance+scholarshipTail+50000:scholarshipTail;
+  const finalNet=totalNet-totalExitCost;
+
+  const s=v=>document.getElementById(v);
+  if(s('ath-tot-ath')) s('ath-tot-ath').textContent=totalAthletes;
+  if(s('ath-tot-save')){s('ath-tot-save').textContent=totalSave>0?fmtK(totalSave):'$0';}
+  if(s('ath-tot-loss')){s('ath-tot-loss').textContent=totalLoss>0?'('+fmtK(totalLoss).replace('(',''):'$0';}
+  if(s('ath-tot-imp')){s('ath-tot-imp').textContent=fmtK(totalNet);s('ath-tot-imp').className='impact-cell '+(totalNet>0?'pos':totalNet<0?'neg':'');}
+  if(s('d2-c1')) s('d2-c1').textContent=isFullExit?'('+fmtK(exitFee).replace('(',''):'N/A — partial cut';
+  if(s('d2-c2')) s('d2-c2').textContent=isFullExit?'('+fmtK(severance).replace('(',''):'N/A — partial cut';
+  if(s('d2-c3')) s('d2-c3').textContent=eliminatedAthletes>0?'('+fmtK(scholarshipTail).replace('(',''):'$0 — no athletes eliminated';
+  if(s('d2-total-exit')){s('d2-total-exit').textContent='('+fmtK(totalExitCost).replace('(','');s('d2-total-exit').className='r neg';}
+  if(s('ath-net-final')){
+    s('ath-net-final').textContent=fmtK(finalNet);
+    s('ath-net-final').style.color=finalNet>0?'var(--g)':finalNet<0?'var(--r)':'var(--tx3)';
+  }
+  if(s('d2-applies')) s('d2-applies').textContent=isFullExit?'Full D2 exit triggered (15+ sports eliminated)':eliminatedAthletes>0?`Partial cut: ${eliminatedAthletes} athletes eliminated`:'No sports eliminated';
+  if(s('ath-exit-note')) s('ath-exit-note').textContent=isFullExit?`Exit fee + severance + ${eliminatedAthletes} athlete scholarship tail`:anyEliminated?`Scholarship tail only: ${eliminatedAthletes} athletes`:'Toggle sports above to model exit';
+}
+
+// ============ PROGRAM CONTROLS ============
+const progGrowthRate=ALL_PROGS.map(()=>0);
+
+function buildProgCtrl(){
+  const tbody=document.getElementById('prog-ctrl-tbody');
+  tbody.innerHTML=ALL_PROGS.map((p,i)=>{
+    const pctStr=(p.pct*100).toFixed(1)+'%';
+    const pctClass=p.pct>=.6?'pg':p.pct>=.4?'pa':'pr';
+    return `<tr>
+      <td class="lab" style="font-size:10px">${p.p}</td>
+      <td class="r">${p.st}</td>
+      <td class="r"><span class="pill ${pctClass}">${pctStr}</span></td>
+      <td class="r" style="white-space:nowrap">
+        <input type="number" id="prog-gr-${i}" value="${progGrowthRate[i]}" min="-100" max="200" step="5" style="width:52px;text-align:right" oninput="progGrChange(${i})"><span style="font-size:9px;color:var(--tx3)">%</span>
+      </td>
+      <td class="r" id="prog-delta-disp-${i}" style="font-family:var(--mono);font-size:11px;color:var(--tx3)">0</td>
+      <td class="c">
+        <div class="tog-group">
+          <button class="tog ${progState[i]===0?'active-r':''}" onclick="setProg(${i},0,this)">Close</button>
+          <button class="tog ${progState[i]===1?'active-a':''}" onclick="setProg(${i},1,this)">Reduce</button>
+          <button class="tog ${progState[i]===2?'active-b':''}" onclick="setProg(${i},2,this)">Keep</button>
+          <button class="tog ${progState[i]===3?'active-g':''}" onclick="setProg(${i},3,this)">Grow</button>
+        </div>
+      </td>
+      <td class="r impact-cell" id="prog-imp-${i}">—</td>
+    </tr>`;
+  }).join('');
+  updateProgTotals();
+}
+
+function progGrChange(i){
+  const el=document.getElementById('prog-gr-'+i);
+  progGrowthRate[i]=parseFloat(el?.value||0);
+  updateProgTotals();
+  updatePL();
+}
+
+function applyGlobalGrowth(rate,mode){
+  ALL_PROGS.forEach((p,i)=>{
+    let gr=(rate!==null&&rate!==undefined)?rate:0;
+    if(mode==='high'){
+      gr=p.pct>=0.6?15:p.pct>=0.4?0:-10;
+      const newState=p.pct>=0.6?3:p.pct>=0.4?2:1;
+      progState[i]=newState;
+      const rows=document.querySelectorAll('#prog-ctrl-tbody tr');
+      if(rows[i]){
+        const btns=rows[i].querySelectorAll('.tog');
+        if(btns.length===4){btns[0].className='tog'+(newState===0?' active-r':'');btns[1].className='tog'+(newState===1?' active-a':'');btns[2].className='tog'+(newState===2?' active-b':'');btns[3].className='tog'+(newState===3?' active-g':'');}
+      }
+    }
+    progGrowthRate[i]=gr;
+    const el=document.getElementById('prog-gr-'+i);
+    if(el) el.value=gr;
+  });
+  updateProgTotals();
+  updatePL();
+}
+
+function setProg(i,val,btn){
+  progState[i]=val;
+  const btns=btn.parentElement.querySelectorAll('.tog');
+  btns[0].className='tog'+(val===0?' active-r':'');
+  btns[1].className='tog'+(val===1?' active-a':'');
+  btns[2].className='tog'+(val===2?' active-b':'');
+  btns[3].className='tog'+(val===3?' active-g':'');
+  const defaultGr=val===0?-100:val===1?-20:val===2?0:15;
+  progGrowthRate[i]=defaultGr;
+  const grEl=document.getElementById('prog-gr-'+i);
+  if(grEl) grEl.value=defaultGr;
+  updateProgTotals();
+  updatePL();
+}
+
+function updateProgTotals(){
+  let total=0, totalDelta=0;
+  ALL_PROGS.forEach((p,i)=>{
+    const gr=progGrowthRate[i]||0;
+    const state=progState[i];
+    let delta=Math.round(p.st*gr/100);
+    let impact=0;
+    if(state===0){
+      impact=-(p.st*p.pct*10000)-(p.st*10000*0.15);
+      delta=-p.st;
+    } else {
+      impact=delta*p.pct*10000;
+    }
+    total+=impact;
+    totalDelta+=delta;
+    const dispEl=document.getElementById('prog-delta-disp-'+i);
+    if(dispEl){
+      dispEl.textContent=(delta>0?'+':'')+delta;
+      dispEl.style.color=delta>0?'var(--g)':delta<0?'var(--r)':'var(--tx3)';
+    }
+    const el=document.getElementById('prog-imp-'+i);
+    if(el){
+      el.textContent=impact===0?'$0':fmtK(impact);
+      el.className='impact-cell '+(impact>0?'pos':impact<0?'neg':'');
+    }
+  });
+  const ti=document.getElementById('prog-tot-imp');
+  const td=document.getElementById('prog-tot-delta');
+  if(ti){ti.textContent=fmtK(total);ti.className='impact-cell '+(total>0?'pos':total<0?'neg':'');}
+  if(td){td.textContent=(totalDelta>0?'+':'')+totalDelta;td.style.color=totalDelta>0?'var(--g)':totalDelta<0?'var(--r)':'var(--tx3)';}
+  updatePL();
+}
+
+// ============ ADMIN CONTROLS ============
+function buildAdminSliders(){
+  const div=document.getElementById('admin-sliders');
+  div.innerHTML=ADMIN_DEPTS.map((d,i)=>`
+    <div class="slrow">
+      <label style="min-width:160px">${d.name}<br><span style="font-size:9px;color:var(--tx3)">Base: $${(d.base/1e3).toFixed(0)}K</span></label>
+      <input type="range" min="0" max="40" value="0" step="5" id="adm-sl-${i}" oninput="updateAdmin()">
+      <span class="slval" id="adm-val-${i}">0%</span>
+    </div>
+  `).join('');
+}
+
+function updateAdmin(){
+  let total=0;
+  ADMIN_DEPTS.forEach((d,i)=>{
+    const sl=document.getElementById('adm-sl-'+i);
+    const pct=sl?parseInt(sl.value):0;
+    const save=d.base*pct/100;
+    total+=save;
+    const v=document.getElementById('adm-val-'+i);
+    if(v) v.textContent=pct+'%';
+  });
+  const aiCost=getSlVal('ai-cost-v',150000)+getSlVal('ai-adv-v',50000)+getSlVal('ai-ir-v',30000);
+  // get actual slider vals
+  const aiC=document.getElementById('admin-sliders')?.parentElement?.querySelector('#ai-cost-v');
+  let actualAiCost=0;
+  ['ai-cost-v','ai-adv-v','ai-ir-v'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) actualAiCost+=parseInt(el.textContent.replace(/\D/g,''))*1000||0;
+  });
+  const atot=document.getElementById('admin-tot');
+  const aitot=document.getElementById('ai-tot');
+  if(atot){atot.textContent=fmtK(total);atot.className='impact-cell '+(total>0?'pos':'');}
+  // update AI sliders display
+  const aiSliders=[['ai-cost-v',150000],['ai-adv-v',50000],['ai-ir-v',30000]];
+  let aiTotal=0;
+  document.querySelectorAll('[id^=ai-cost-v],[id^=ai-adv-v],[id^=ai-ir-v]').forEach(el=>{
+    // just update via their own input handlers
+  });
+  updatePL();
+}
+
+function getSlVal(id,def){const el=document.getElementById(id);return el?parseInt(el.textContent.replace(/[^0-9]/g,''))*1000||def:def;}
+
+function getAdminSavings(){
+  let total=0;
+  ADMIN_DEPTS.forEach((d,i)=>{
+    const sl=document.getElementById('adm-sl-'+i);
+    if(sl) total+=d.base*parseInt(sl.value)/100;
+  });
+  return total;
+}
+function getAiCost(){
+  let total=0;
+  // read from range inputs before the display labels
+  const ranges=document.querySelectorAll('#stv-admin input[type=range]');
+  ranges.forEach(r=>{
+    // these are the dept ranges (0-40%) plus the 3 AI cost ranges
+  });
+  // Simpler: parse displayed values
+  const ids=['ai-cost-v','ai-adv-v','ai-ir-v'];
+  ids.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){const t=el.textContent.replace(/\$/,'').replace('K','');total+=parseFloat(t)*1000||0;}
+  });
+  return total;
+}
+
+// Keep track of AI slider raw values
+const aiVals={cost:150000,adv:50000,ir:30000};
+document.addEventListener('input',function(e){
+  if(e.target.id==='ai-cost-range'||e.target.closest('#stv-admin')){
+    // handled by individual oninput
+  }
+});
+
+// ============ ENROLLMENT CONTROLS ============
+function buildEnrollSliders(){
+  const div=document.getElementById('enroll-sliders');
+  div.innerHTML=ENROLL_CHANNELS.map((c,i)=>`
+    <div class="slrow">
+      <label style="min-width:160px">${c.name}<br><span style="font-size:9px;color:var(--tx3)">${c.currentStudents} students · $${(c.netPerStudent/1e3).toFixed(1)}K net/student</span></label>
+      <input type="range" min="-${Math.floor(c.currentStudents*0.5)}" max="${Math.floor(c.currentStudents*0.8)}" value="0" step="5" id="enr-sl-${i}" oninput="updateEnroll()">
+      <span class="slval" id="enr-val-${i}">0</span>
+    </div>
+  `).join('');
+}
+
+function updateEnroll(){
+  let totalRev=0,totalRecruitCost=0;
+  const cpeTrad=parseInt(document.getElementById('cpe-trad-v')?.textContent?.replace(/\D/g,'')||'2800');
+  const cpeOnline=parseInt(document.getElementById('cpe-online-v')?.textContent?.replace(/\D/g,'')||'1200');
+  ENROLL_CHANNELS.forEach((c,i)=>{
+    const sl=document.getElementById('enr-sl-'+i);
+    const delta=sl?parseInt(sl.value)||0:0;
+    const v=document.getElementById('enr-val-'+i);
+    if(v) v.textContent=(delta>0?'+':'')+delta;
+    const rev=delta*c.netPerStudent;
+    const isOnline=c.name.toLowerCase().includes('online')||c.name.toLowerCase().includes('sync');
+    const rcost=Math.max(delta,0)*(isOnline?cpeOnline:cpeTrad);
+    totalRev+=rev;
+    totalRecruitCost+=rcost;
+  });
+  // Update CPE display
+  ['cpe-trad','cpe-online'].forEach(id=>{
+    const sl=document.querySelector(`input[oninput*="${id}"]`);
+    // handled below
+  });
+  const net=totalRev-totalRecruitCost;
+  const el=document.getElementById('enroll-tot');
+  if(el){el.textContent=fmtK(net);el.className='impact-cell '+(net>0?'pos':net<0?'neg':'');}
+  updatePL();
+}
+
+// Update slider display labels for CPE
+document.addEventListener('input',e=>{
+  if(e.target.closest('#stv-enroll')){
+    const slrows=document.querySelectorAll('#stv-enroll .slrow');
+    slrows.forEach(row=>{
+      const sl=row.querySelector('input[type=range]');
+      const val=row.querySelector('.slval');
+      if(sl&&val){
+        const v=parseInt(sl.value);
+        if(sl.id&&sl.id.startsWith('cpe')){
+          // These are special — handled separately
+        } else if(sl.id&&sl.id.startsWith('enr-sl')){
+          val.textContent=(v>0?'+':'')+v;
+        }
+      }
+    });
+    // CPE sliders
+    const cpeTrad=document.getElementById('cpe-trad-v');
+    const cpeOnline=document.getElementById('cpe-online-v');
+    if(cpeTrad&&e.target.closest('.slrow')&&e.target.closest('.slrow').querySelector('#cpe-trad-v')){
+      cpeTrad.textContent='$'+parseInt(e.target.value).toLocaleString();
+    }
+    if(cpeOnline&&e.target.closest('.slrow')&&e.target.closest('.slrow').querySelector('#cpe-online-v')){
+      cpeOnline.textContent='$'+parseInt(e.target.value).toLocaleString();
+    }
+    updateEnroll();
+  }
+  if(e.target.id&&e.target.closest('#stv-admin')){
+    // update ai display values
+    const aiv={
+      0:'ai-cost-v',1:'ai-adv-v',2:'ai-ir-v'
+    };
+    const aiRanges=document.querySelectorAll('.card input[type=range]');
+    // handled by oninput on individual elements
+  }
+});
+
+// ============ MASTER P&L UPDATE ============
+function getAthNetImpact(){
+  let totalNet=0;
+  SPORTS_DATA.forEach((s,i)=>{totalNet+=athImpact(s,athState[i]).net;});
+  // Subtract exit costs
+  const exitInputs=getD2ExitInputs();
+  const eliminatedAthletes=SPORTS_DATA.filter((_,i)=>athState[i]===2).reduce((a,s)=>a+s.a,0);
+  const eliminatedSports=athState.filter(s=>s===2).length;
+  const isFullExit=eliminatedSports>=15;
+  const scholarshipTail=eliminatedAthletes*exitInputs.scholVal*exitInputs.scholYrs;
+  const exitCosts=isFullExit?exitInputs.fee+exitInputs.sev+scholarshipTail+50000:scholarshipTail;
+  return totalNet-exitCosts;
+}
+function getProgNetImpact(){
+  let total=0;
+  ALL_PROGS.forEach((p,i)=>{
+    const enrEl=document.getElementById('prog-enr-'+i);
+    const delta=enrEl?parseInt(enrEl.value)||0:0;
+    const state=progState[i];
+    if(state===0) total-=(p.st*p.pct*10000)+(p.st*10000*0.15);
+    else total+=delta*p.pct*10000;
+  });
+  return total;
+}
+function getEnrollNetImpact(){
+  let total=0;
+  ENROLL_CHANNELS.forEach((c,i)=>{
+    const sl=document.getElementById('enr-sl-'+i);
+    if(!sl) return;
+    const delta=parseInt(sl.value)||0;
+    const rev=delta*c.netPerStudent;
+    const isOnline=c.name.toLowerCase().includes('online')||c.name.toLowerCase().includes('sync');
+    const cpe=isOnline?1200:2800;
+    total+=rev-Math.max(delta,0)*cpe;
+  });
+  return total;
+}
+
+function updatePL(){
+  const BASE_REV=39479602, BASE_EXP=49311565;
+  const BASE_ATH_EXP=6400000, BASE_ADMIN_EXP=8200000, BASE_INSTR=18100000;
+
+  const athNet=getAthNetImpact();
+  const progNet=getProgNetImpact();
+  const enrollNet=getEnrollNetImpact();
+  const adminSave=getAdminSavings();
+
+  // Revenue changes: enrollment + prog growth
+  const revChange=enrollNet>0?enrollNet*0.7:enrollNet; // conservative
+  const projRev=BASE_REV+revChange+(progNet>0?progNet*0.5:0)+1000000; // +$1M tuition increase FY27
+
+  // Expense changes
+  const athExpChange=-(athNet>0?athNet*0.4:0); // partial expense offset
+  const progExpChange=progNet<0?progNet*0.3:0; // program closures add some teach-out cost
+  const instrChange=enrollNet>0?enrollNet*0.35:0; // more students = more instruction cost
+  const projExp=BASE_EXP-adminSave+athExpChange+progExpChange+instrChange-800000; // -$800K some baseline efficiency
+
+  const projNet=projRev-projExp;
+
+  // Update displays
+  const fmt1=v=>fmtM(v,1);
+  const set=(id,val,cond)=>{const el=document.getElementById(id);if(el){el.textContent=val;el.className=cond;}};
+  set('pl-tuition',fmt1(projRev-4400000-2300000),'r');
+  set('pl-rev',fmt1(projRev),'r '+(projRev>BASE_REV?'pos':'neg'));
+  set('pl-admin',fmt1(BASE_ADMIN_EXP-adminSave),'r '+(adminSave>0?'pos':''));
+  set('pl-ath',fmt1(BASE_ATH_EXP-athNet*0.4),'r');
+  set('pl-instr',fmt1(BASE_INSTR+instrChange),'r');
+  set('pl-exp',fmt1(projExp),'r '+(projExp<BASE_EXP?'pos':'neg'));
+
+  const netEl=document.getElementById('pl-net');
+  if(netEl){
+    netEl.textContent=fmtM(projNet,1);
+    netEl.style.color=projNet>0?'var(--g)':projNet>-4000000?'var(--am)':'var(--r)';
+  }
+  // Progress bar
+  const improvement=projNet-(-9831963);
+  const pct=Math.min(Math.max((improvement/9831963)*100,0),100);
+  const barEl=document.getElementById('pl-bar');
+  if(barEl){barEl.style.width=pct+'%';barEl.style.background=projNet>0?'var(--g)':projNet>-4000000?'var(--am)':'var(--r)';}
+  set('pl-pct',`${pct.toFixed(0)}% improvement from ($9.83M) baseline`,'r');
+
+  // Assessment
+  let assess='';
+  if(projNet>0) assess='✅ FY27 surplus achieved. Document this for WSCUC Standard 3.';
+  else if(projNet>-2000000) assess='✅ Near break-even. Strong Year 2 position for a 3-year plan to WSCUC.';
+  else if(projNet>-5000000) assess='⚠ Meaningful progress. Present as Year 2 of 3-year plan with clear FY28 surplus path.';
+  else assess='🔴 More intervention needed. Add admin savings or enrollment growth to close gap.';
+  set('pl-assess',assess,'');
+
+  // Update top badge
+  const badge=document.getElementById('fy27badge');
+  if(badge){badge.textContent='FY27 Net: '+fmtM(projNet,1);badge.style.color=projNet>0?'var(--g)':projNet>-4000000?'var(--am)':'var(--r)';}
+}
+
+// ============ LTV MODEL ============
+let ltvCharts={};
+function ltvCalc(){
+  const gT=parseFloat(document.getElementById('l-tuition')?.value||42000);
+  const dr=parseInt(document.getElementById('l-dr')?.value||41)/100;
+  const rnb=parseFloat(document.getElementById('l-rnb')?.value||8500);
+  const fees=parseFloat(document.getElementById('l-fees')?.value||1200);
+  const r1=parseInt(document.getElementById('l-r1')?.value||78)/100;
+  const r2=parseInt(document.getElementById('l-r2')?.value||86)/100;
+  const r3=parseInt(document.getElementById('l-r3')?.value||92)/100;
+  const rc=parseFloat(document.getElementById('l-recruit')?.value||2800);
+  const oc=parseFloat(document.getElementById('l-opcost')?.value||32000);
+  const gr=parseInt(document.getElementById('l-grate')?.value||14)/100;
+  const ag=parseFloat(document.getElementById('l-gift')?.value||450);
+  const gy=parseInt(document.getElementById('l-gyrs')?.value||20);
+  const cs=parseInt(document.getElementById('l-class')?.value||250);
+
+  // Update labels
+  const upd=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  upd('l-dr-v',Math.round(dr*100)+'%');
+  upd('l-r1-v',Math.round(r1*100)+'%');
+  upd('l-r2-v',Math.round(r2*100)+'%');
+  upd('l-r3-v',Math.round(r3*100)+'%');
+  upd('l-grate-v',Math.round(gr*100)+'%');
+  upd('l-gyrs-v',gy);
+
+  const netT=gT*(1-dr);
+  const annRev=netT+rnb+fees;
+  const students=[cs,Math.round(cs*r1),Math.round(cs*r1*r2),Math.round(cs*r1*r2*r3)];
+  const gradRate=students[3]/cs;
+  const survProbs=[1,r1,r1*r2,r1*r2*r3];
+  const wRev=survProbs.reduce((a,p)=>a+p*annRev,0);
+  const wCost=survProbs.reduce((a,p)=>a+p*oc,0);
+  const alumniLTV=gradRate*gr*ag*gy;
+  const ltv=wRev-wCost-rc+alumniLTV;
+  const cac=rc+gT*dr;
+  const ratio=ltv/cac;
+  const totCohortRev=students.reduce((a,s)=>a+s*annRev,0);
+  const totCohortCost=students.reduce((a,s)=>a+s*oc,0)+cs*rc;
+
+  upd('l-ltv',fmtD(ltv));
+  upd('l-crev',fmtM(totCohortRev));
+  upd('l-ccost',fmtM(totCohortCost));
+  upd('l-ratio',ratio.toFixed(1)+'×');
+
+  // Charts
+  const mkL=id=>{const el=document.getElementById(id);if(!el)return null;if(ltvCharts[id])ltvCharts[id].destroy();return el;};
+  const retEl=mkL('l-c-ret');
+  if(retEl) ltvCharts['l-c-ret']=new Chart(retEl,{type:'bar',data:{labels:['Year 1','Year 2','Year 3','Year 4'],datasets:[{data:students,backgroundColor:[G,'#2d8a50','#4aaa70','#68c48a'],borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:cs*1.1,ticks:{font:{family:'DM Mono',size:10}},grid:{color:'#f0ede6'}},x:{ticks:{font:{family:'DM Sans',size:11}},grid:{display:false}}}}});
+  const revEl=mkL('l-c-rev');
+  if(revEl) ltvCharts['l-c-rev']=new Chart(revEl,{type:'bar',data:{labels:['Year 1','Year 2','Year 3','Year 4'],datasets:[{label:'Revenue/student',data:Array(4).fill(Math.round(annRev)),backgroundColor:'rgba(31,107,58,.15)',borderColor:G,borderWidth:1.5,borderRadius:4},{label:'Op cost/student',data:Array(4).fill(oc),backgroundColor:'rgba(185,28,28,.15)',borderColor:R,borderWidth:1.5,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{callback:v=>'$'+Math.round(v/1000)+'K',font:{family:'DM Mono',size:10}},grid:{color:'#f0ede6'}},x:{ticks:{font:{family:'DM Sans',size:11}},grid:{display:false}}}}});
+  // Cumulative
+  const cumul=[];let runCost=cs*rc;
+  students.forEach((s,i)=>{runCost+=s*oc;cumul.push(students.slice(0,i+1).reduce((a,ss)=>a+ss*annRev,0)-runCost);});
+  const cumulEl=mkL('l-c-cumul');
+  if(cumulEl) ltvCharts['l-c-cumul']=new Chart(cumulEl,{type:'bar',data:{labels:['Year 1','Year 2','Year 3','Year 4'],datasets:[{data:cumul.map(v=>Math.round(v)),backgroundColor:cumul.map(v=>v>=0?G:R),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>(v<0?'-':'')+'$'+Math.abs(Math.round(v/1000))+'K',font:{family:'DM Mono',size:10}},grid:{color:'#f0ede6'}},x:{ticks:{font:{family:'DM Sans',size:11}},grid:{display:false}}}}});
+
+  // LTV table
+  const tuitionLTV=survProbs.reduce((a,p)=>a+p*netT,0);
+  const rnbLTV=survProbs.reduce((a,p)=>a+p*rnb,0);
+  const feesLTV=survProbs.reduce((a,p)=>a+p*fees,0);
+  const opLTV=survProbs.reduce((a,p)=>a+p*oc,0);
+  const rows=[
+    {l:'Net tuition (retention-wtd)',v:tuitionLTV,c:'pos'},
+    {l:'Room & board (retention-wtd)',v:rnbLTV,c:'pos'},
+    {l:'Fees & other (retention-wtd)',v:feesLTV,c:'pos'},
+    {l:'Alumni giving (modeled)',v:alumniLTV,c:'pos'},
+    {l:'− Operating costs',v:-opLTV,c:'neg'},
+    {l:'− Recruitment cost',v:-rc,c:'neg'},
+    {l:'Net LTV per enrolled student',v:ltv,c:ltv>0?'pos':'neg',bold:true},
+  ];
+  const tbody=document.getElementById('l-ltv-tbody');
+  if(tbody) tbody.innerHTML=rows.map(r=>`<tr ${r.bold?'class="tot"':''}><td class="lab">${r.l}</td><td class="r ${r.c}">${fmtD(r.v)}</td><td class="r" style="font-size:10px;color:var(--tx3)">${r.bold?'LTV:CAC = '+ratio.toFixed(1)+'×':r.v>0?'revenue':'cost'}</td></tr>`).join('');
+}
+
+// ============ NAV & SUB-TABS ============
+const PAGES={overview:'Financial Overview',revenue:'Revenue & Enrollment',programs:'Programs & Margins',athletics:'Athletics Analysis',scenarios:'FY27 Scenario Model',ltv:'Student LTV Model',wasc:'WASC Readiness'};
+const SUBS={overview:'FY2020–FY2025 actuals · School contribution margins',revenue:'Credit hour trends · Channel margins · Tuition economics',programs:'Program-level contribution margins · Strategic recommendations',athletics:'Sport-by-sport margins · D2 exit analysis',scenarios:'Line-by-line scenario modeling · Live FY27 P&L',ltv:'Student lifetime value · Cohort unit economics',wasc:'WSCUC Standard 3 readiness · 3-year narrative'};
+
+function show(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.getElementById('view-'+id)?.classList.add('active');
+  document.querySelectorAll('.ni').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+id+"'"))n.classList.add('active');});
+  document.getElementById('ptitle').textContent=PAGES[id]||id;
+  document.getElementById('psub').textContent=SUBS[id]||'';
+  setTimeout(()=>{
+    if(typeof Chart!=='undefined'){initCharts();if(id==='ltv')ltvCalc();}
+    else{setTimeout(()=>{if(typeof Chart!=='undefined'){initCharts();if(id==='ltv')ltvCalc();}},500);}
+  },100);
+}
+
+function stab(id,el){
+  document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.stab-view').forEach(v=>v.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('stv-'+id)?.classList.add('active');
+}
+
+// Robust Chart.js loader with dual CDN fallback
+function loadApp(){
+  buildSportsTable();
+  buildAthCtrl();
+  buildProgCtrl();
+  buildAdminSliders();
+  buildEnrollSliders();
+  updatePL();
+  ltvCalc();
+  // Retry chart init until Chart.js is confirmed ready
+  var attempts=0;
+  function tryCharts(){
+    if(typeof Chart!=='undefined'){
+      initCharts();
+    } else if(attempts++<20){
+      setTimeout(tryCharts,150);
+    }
+  }
+  tryCharts();
+}
+
+function loadChartJS(){
+  if(typeof Chart!=='undefined'){loadApp();return;}
+  var cdns=[
+    'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js',
+    'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js',
+    'https://unpkg.com/chart.js@4.4.1/dist/chart.umd.min.js'
+  ];
+  var idx=0;
+  function tryNext(){
+    if(idx>=cdns.length){console.error('Chart.js failed to load from all CDNs');return;}
+    var s=document.createElement('script');
+    s.src=cdns[idx++];
+    s.onload=loadApp;
+    s.onerror=tryNext;
+    document.head.appendChild(s);
+  }
+  tryNext();
+}
+
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',loadChartJS);
+} else {
+  loadChartJS();
+}
+</script>
+</body>
+</html>
