@@ -1,131 +1,877 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PugFlix - Unlimited Pug Entertainment</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jessup University — Strategic Budget Platform</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --nav-bg:#0d1b2a;--nav-border:#1a2e42;--nav-text:#8ba3bb;--nav-active:#e8f0eb;--nav-hover:#1e3048;
+  --bg:#f4f2ed;--surface:#ffffff;--surface2:#f0ede6;--border:#ddd9d0;
+  --text:#1a1814;--text2:#5a5650;--text3:#8a8680;
+  --green:#1f6b3a;--green-bg:#e8f4ed;--green-mid:#2d8a50;
+  --red:#b91c1c;--red-bg:#fef2f2;--amber:#b45309;--amber-bg:#fffbeb;
+  --blue:#1d4ed8;--blue-bg:#eff6ff;
+  --radius:6px;--radius-lg:10px;
+  --mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden;font-size:13px}
+
+/* SIDEBAR */
+.sidebar{width:220px;min-width:220px;background:var(--nav-bg);display:flex;flex-direction:column;border-right:1px solid var(--nav-border);overflow-y:auto}
+.sidebar-logo{padding:20px 16px 16px;border-bottom:1px solid var(--nav-border)}
+.sidebar-logo .org{font-size:11px;font-weight:600;color:#4a7fa5;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px}
+.sidebar-logo .title{font-size:14px;font-weight:600;color:var(--nav-active);line-height:1.3}
+.sidebar-logo .sub{font-size:10px;color:var(--nav-text);margin-top:2px}
+.nav-section{padding:16px 0 8px}
+.nav-section-label{padding:0 16px 6px;font-size:10px;font-weight:600;color:#3a5a73;text-transform:uppercase;letter-spacing:0.08em}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 16px;cursor:pointer;color:var(--nav-text);font-size:12px;font-weight:400;transition:all 0.15s;border-left:3px solid transparent}
+.nav-item:hover{background:var(--nav-hover);color:#c5d9e8}
+.nav-item.active{background:var(--nav-hover);color:var(--nav-active);border-left-color:#2d8a50;font-weight:500}
+.nav-dot{width:7px;height:7px;border-radius:50%;background:#3a5a73;flex-shrink:0;transition:background 0.15s}
+.nav-item.active .nav-dot,.nav-item:hover .nav-dot{background:#2d8a50}
+.nav-item.alert .nav-dot{background:#dc2626}
+.nav-divider{height:1px;background:var(--nav-border);margin:8px 0}
+.sidebar-footer{margin-top:auto;padding:12px 16px;border-top:1px solid var(--nav-border)}
+.deficit-badge{background:#7f1d1d;border-radius:6px;padding:8px 10px}
+.deficit-badge .label{font-size:9px;color:#fca5a5;text-transform:uppercase;letter-spacing:0.06em;font-weight:600}
+.deficit-badge .val{font-family:var(--mono);font-size:18px;font-weight:500;color:#fef2f2;margin-top:2px}
+.deficit-badge .sub{font-size:9px;color:#fca5a5;margin-top:1px}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.topbar-title{font-size:15px;font-weight:600;color:var(--text)}
+.topbar-sub{font-size:11px;color:var(--text3);margin-top:1px}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.fiscal-badge{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:3px 10px;font-size:11px;font-weight:500;color:var(--text2);font-family:var(--mono)}
+.content{flex:1;overflow-y:auto;padding:20px 24px}
+
+/* CARDS */
+.kpi-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:16px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 14px}
+.kpi.danger{background:var(--red-bg);border-color:#fecaca}
+.kpi.success{background:var(--green-bg);border-color:#bbf7d0}
+.kpi.amber{background:var(--amber-bg);border-color:#fde68a}
+.kpi.dark{background:var(--nav-bg);border-color:var(--nav-border)}
+.kpi-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--text3);margin-bottom:4px}
+.kpi.danger .kpi-label{color:#dc2626}
+.kpi.success .kpi-label{color:#15803d}
+.kpi.dark .kpi-label{color:#4a7fa5}
+.kpi-value{font-size:22px;font-weight:300;font-family:var(--mono);letter-spacing:-0.02em;color:var(--text)}
+.kpi.danger .kpi-value{color:var(--red)}
+.kpi.success .kpi-value{color:var(--green)}
+.kpi.amber .kpi-value{color:var(--amber)}
+.kpi.dark .kpi-value{color:#c5d9e8}
+.kpi-sub{font-size:10px;color:var(--text3);margin-top:3px}
+.kpi.danger .kpi-sub{color:#fca5a5}
+.kpi.dark .kpi-sub{color:#4a7fa5}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:16px}
+.card-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
+
+/* TABLES */
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);padding:6px 10px;border-bottom:1px solid var(--border)}
+th.r,td.r{text-align:right}
+td{padding:6px 10px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:11px;color:var(--text)}
+td.label{font-family:var(--sans);font-size:12px;color:var(--text2)}
+tr:last-child td{border-bottom:none}
+tr.total td{background:var(--surface2);font-weight:500}
+.pos{color:var(--green)}
+.neg{color:var(--red)}
+.warn{color:var(--amber)}
+.badge{display:inline-block;font-size:9px;font-weight:600;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:0.04em}
+.badge-green{background:var(--green-bg);color:var(--green)}
+.badge-red{background:var(--red-bg);color:var(--red)}
+.badge-amber{background:var(--amber-bg);color:var(--amber)}
+.badge-blue{background:var(--blue-bg);color:var(--blue)}
+
+/* BAR INDICATOR */
+.bar-wrap{width:100%;background:var(--surface2);border-radius:3px;height:6px;overflow:hidden;margin-top:4px}
+.bar-fill{height:100%;border-radius:3px;transition:width 0.3s}
+
+/* SCENARIO CONTROLS */
+.scenario-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px}
+.scenario-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;cursor:pointer;transition:all 0.15s}
+.scenario-card:hover{border-color:#2d8a50;background:#fafff9}
+.scenario-card.selected{border-color:#2d8a50;border-width:2px;background:var(--green-bg)}
+.scenario-card.selected-red{border-color:var(--red);border-width:2px;background:var(--red-bg)}
+.scenario-card.selected-amber{border-color:var(--amber);border-width:2px;background:var(--amber-bg)}
+.sc-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px}
+.sc-sub{font-size:10px;color:var(--text3);line-height:1.5}
+.sc-impact{font-family:var(--mono);font-size:13px;font-weight:500;margin-top:8px}
+
+.section-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;margin-top:4px}
+.section-sub{font-size:11px;color:var(--text3);margin-bottom:12px;line-height:1.6}
+
+/* WASC */
+.wasc-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start}
+.wasc-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700}
+.wasc-icon.pass{background:var(--green-bg);color:var(--green)}
+.wasc-icon.warn{background:var(--amber-bg);color:var(--amber)}
+.wasc-icon.fail{background:var(--red-bg);color:var(--red)}
+.wasc-content .wasc-label{font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px}
+.wasc-content .wasc-desc{font-size:11px;color:var(--text3);line-height:1.5}
+.wasc-content .wasc-action{font-size:10px;color:var(--amber);margin-top:4px;font-weight:600}
+
+/* RANGE SLIDERS */
+.slider-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.slider-row label{font-size:11px;color:var(--text2);font-weight:500;flex:1;min-width:120px}
+.slider-row input[type=range]{flex:1;accent-color:var(--green)}
+.slider-val{font-family:var(--mono);font-size:11px;color:var(--green);font-weight:500;min-width:40px;text-align:right}
+
+.view{display:none}
+.view.active{display:block}
+
+/* ALERT BOX */
+.alert-box{border-radius:var(--radius);padding:12px 14px;margin-bottom:14px;font-size:12px;line-height:1.6}
+.alert-box.red{background:var(--red-bg);border:1px solid #fecaca;color:#7f1d1d}
+.alert-box.amber{background:var(--amber-bg);border:1px solid #fde68a;color:#78350f}
+.alert-box.green{background:var(--green-bg);border:1px solid #bbf7d0;color:#14532d}
+.alert-box .alert-title{font-weight:700;margin-bottom:4px;font-size:12px}
+
+/* TREND ARROW */
+.trend-up{color:var(--green)}
+.trend-down{color:var(--red)}
+
+input[type=number]{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:5px 8px;font-family:var(--mono);font-size:11px;color:var(--text);width:90px;outline:none}
+input[type=number]:focus{border-color:var(--green);background:#fff}
+select{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:4px 8px;font-family:var(--sans);font-size:11px;color:var(--text);outline:none;cursor:pointer}
+
+.pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
+.pill-green{background:var(--green-bg);color:var(--green)}
+.pill-red{background:var(--red-bg);color:var(--red)}
+.pill-amber{background:var(--amber-bg);color:var(--amber)}
+.pill-blue{background:var(--blue-bg);color:var(--blue)}
+</style>
 </head>
 <body>
-    <!-- Navigation Bar -->
-    <nav class="navbar">
-        <div class="nav-content">
-            <div class="nav-left">
-                <h1 class="logo">PUGFLIX</h1>
-                <ul class="nav-menu">
-                    <li><a href="#" class="active">Home</a></li>
-                    <li><a href="#">TV Shows</a></li>
-                    <li><a href="#">Movies</a></li>
-                    <li><a href="#">New & Pawpular</a></li>
-                    <li><a href="#">My List</a></li>
-                </ul>
-            </div>
-            <div class="nav-right">
-                <button class="search-btn">🔍</button>
-                <button class="notification-btn">🔔</button>
-                <div class="profile">
-                    <img src="https://images.unsplash.com/photo-1517849845537-4d257902454a?w=50&h=50&fit=crop" alt="Profile">
-                </div>
-            </div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="org">William Jessup University</div>
+    <div class="title">Strategic Budget Platform</div>
+    <div class="sub">FY2027 Transformation Plan</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Analysis</div>
+    <div class="nav-item active" onclick="showView('overview')"><span class="nav-dot"></span>Overview</div>
+    <div class="nav-item" onclick="showView('revenue')"><span class="nav-dot"></span>Revenue & Enrollment</div>
+    <div class="nav-item" onclick="showView('programs')"><span class="nav-dot"></span>Programs & Margins</div>
+    <div class="nav-item alert" onclick="showView('athletics')"><span class="nav-dot"></span>Athletics Analysis</div>
+  </div>
+
+  <div class="nav-divider"></div>
+  <div class="nav-section">
+    <div class="nav-section-label">Planning</div>
+    <div class="nav-item" onclick="showView('scenarios')"><span class="nav-dot"></span>FY27 Scenario Model</div>
+    <div class="nav-item" onclick="showView('ltv')"><span class="nav-dot"></span>Student LTV Model</div>
+    <div class="nav-item" onclick="showView('wasc')"><span class="nav-dot"></span>WASC Readiness</div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="deficit-badge">
+      <div class="label">FY2025 Deficit</div>
+      <div class="val">($9.8M)</div>
+      <div class="sub">↑ 17% from FY2024</div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title" id="page-title">Financial Overview</div>
+      <div class="topbar-sub" id="page-sub">FY2020–FY2025 actuals · FY2026–FY2027 projections</div>
+    </div>
+    <div class="topbar-right">
+      <span class="fiscal-badge">FY2025 Base</span>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ==================== OVERVIEW ==================== -->
+    <div class="view active" id="view-overview">
+      <div class="alert-box red">
+        <div class="alert-title">⚠ Financial Crisis — Accelerating Deficit</div>
+        Expenses have grown 44% ($34M → $49.3M) since FY2020 while revenue grew only 10% ($36M → $39.5M). The institution moved from a $1.95M surplus to a $9.83M deficit in five years. Without structural intervention, this trajectory is unsustainable and will trigger WSCUC financial viability review.
+      </div>
+
+      <div class="kpi-row">
+        <div class="kpi danger">
+          <div class="kpi-label">FY25 Net Deficit</div>
+          <div class="kpi-value">($9.8M)</div>
+          <div class="kpi-sub">vs ($8.4M) in FY24</div>
         </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <header class="hero">
-        <div class="hero-content">
-            <h1 class="hero-title">Pug Life Chronicles</h1>
-            <p class="hero-description">
-                Join the most adorable pug on an epic journey through nap time, snack time, 
-                and everything in between. Winner of 12 Golden Bone Awards.
-            </p>
-            <div class="hero-buttons">
-                <button class="btn btn-play">▶ Play</button>
-                <button class="btn btn-info">ℹ More Info</button>
-            </div>
+        <div class="kpi">
+          <div class="kpi-label">FY25 Revenue</div>
+          <div class="kpi-value">$39.5M</div>
+          <div class="kpi-sub">↑ 10% from FY20</div>
         </div>
-        <div class="hero-fade"></div>
-    </header>
-
-    <!-- Content Rows -->
-    <main class="content">
-        <section class="row">
-            <h2 class="row-title">Trending Now</h2>
-            <div class="row-posters">
-                {% for show in shows.trending %}
-                <div class="poster">
-                    <img src="{{ show.image }}" alt="{{ show.title }}">
-                    <div class="poster-info">
-                        <h3>{{ show.title }}</h3>
-                        <p>{{ show.description }}</p>
-                        <button class="btn-small">▶ Play</button>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </section>
-
-        <section class="row">
-            <h2 class="row-title">Action & Adventure</h2>
-            <div class="row-posters">
-                {% for show in shows.action %}
-                <div class="poster">
-                    <img src="{{ show.image }}" alt="{{ show.title }}">
-                    <div class="poster-info">
-                        <h3>{{ show.title }}</h3>
-                        <p>{{ show.description }}</p>
-                        <button class="btn-small">▶ Play</button>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </section>
-
-        <section class="row">
-            <h2 class="row-title">Comedy</h2>
-            <div class="row-posters">
-                {% for show in shows.comedy %}
-                <div class="poster">
-                    <img src="{{ show.image }}" alt="{{ show.title }}">
-                    <div class="poster-info">
-                        <h3>{{ show.title }}</h3>
-                        <p>{{ show.description }}</p>
-                        <button class="btn-small">▶ Play</button>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </section>
-
-        <section class="row">
-            <h2 class="row-title">Documentaries</h2>
-            <div class="row-posters">
-                {% for show in shows.documentaries %}
-                <div class="poster">
-                    <img src="{{ show.image }}" alt="{{ show.title }}">
-                    <div class="poster-info">
-                        <h3>{{ show.title }}</h3>
-                        <p>{{ show.description }}</p>
-                        <button class="btn-small">▶ Play</button>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </section>
-    </main>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-content">
-            <p>Questions? Call 1-800-PUG-FLIX</p>
-            <div class="footer-links">
-                <a href="#">FAQ</a>
-                <a href="#">Help Center</a>
-                <a href="#">Terms of Use</a>
-                <a href="#">Privacy</a>
-                <a href="#">Cookie Preferences</a>
-            </div>
-            <p class="footer-text">© 2026 PugFlix, Inc. All pugs reserved.</p>
+        <div class="kpi danger">
+          <div class="kpi-label">FY25 Expenses</div>
+          <div class="kpi-value">$49.3M</div>
+          <div class="kpi-sub">↑ 44% from FY20</div>
         </div>
-    </footer>
+        <div class="kpi amber">
+          <div class="kpi-label">Margin per Credit Hr</div>
+          <div class="kpi-value">$347</div>
+          <div class="kpi-sub">↓ from $399 peak (FY20)</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Athletes / Total Students</div>
+          <div class="kpi-value">23.9%</div>
+          <div class="kpi-sub">351 of 1,466 students</div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="card-title">Revenue vs Expenses (FY2020–FY2025)</div>
+          <div style="position:relative;height:240px"><canvas id="overviewChart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Net Surplus / (Deficit) by Year</div>
+          <div style="position:relative;height:240px"><canvas id="deficitChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Contribution Margin by School — FY2024</div>
+        <table>
+          <thead><tr><th>School</th><th class="r">Students</th><th class="r">Athletes</th><th class="r">Revenue</th><th class="r">Direct Costs</th><th class="r">Margin</th><th class="r">Margin %</th><th class="r">Assessment</th></tr></thead>
+          <tbody>
+            <tr><td class="label">Business</td><td class="r">363</td><td class="r">93</td><td class="r pos">$5.0M</td><td class="r">$1.5M</td><td class="r pos">$3.5M</td><td class="r"><span class="pill pill-green">70.4%</span></td><td class="r"><span class="badge badge-green">Invest</span></td></tr>
+            <tr><td class="label">Psychology</td><td class="r">243</td><td class="r">28</td><td class="r pos">$3.8M</td><td class="r">$1.2M</td><td class="r pos">$2.6M</td><td class="r"><span class="pill pill-green">68.2%</span></td><td class="r"><span class="badge badge-green">Invest</span></td></tr>
+            <tr><td class="label">Natural & Applied Sciences</td><td class="r">350</td><td class="r">133</td><td class="r pos">$7.2M</td><td class="r">$3.2M</td><td class="r pos">$4.0M</td><td class="r"><span class="pill pill-green">55.6%</span></td><td class="r"><span class="badge badge-green">Grow</span></td></tr>
+            <tr><td class="label">Theology & Leadership</td><td class="r">120</td><td class="r">18</td><td class="r">$1.2M</td><td class="r">$0.6M</td><td class="r">$0.6M</td><td class="r"><span class="pill pill-amber">49.3%</span></td><td class="r"><span class="badge badge-amber">Monitor</span></td></tr>
+            <tr><td class="label">Humanities & Arts</td><td class="r">192</td><td class="r">55</td><td class="r">$3.2M</td><td class="r">$1.7M</td><td class="r">$1.5M</td><td class="r"><span class="pill pill-amber">46.1%</span></td><td class="r"><span class="badge badge-amber">Review</span></td></tr>
+            <tr><td class="label">Education</td><td class="r">150</td><td class="r">30</td><td class="r">$2.0M</td><td class="r">$1.1M</td><td class="r">$0.9M</td><td class="r"><span class="pill pill-amber">44.2%</span></td><td class="r"><span class="badge badge-amber">Review</span></td></tr>
+            <tr class="total"><td class="label">Grand Total</td><td class="r">1,466</td><td class="r">351</td><td class="r">$22.7M</td><td class="r">$9.5M</td><td class="r pos">$13.2M</td><td class="r"><span class="pill pill-green">58.3%</span></td><td class="r"></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ==================== REVENUE ==================== -->
+    <div class="view" id="view-revenue">
+      <div class="kpi-row">
+        <div class="kpi"><div class="kpi-label">FY24 Credit Hours</div><div class="kpi-value">38,169</div><div class="kpi-sub">↓ 18% from 2016 peak</div></div>
+        <div class="kpi amber"><div class="kpi-label">Gross $/Credit Hr</div><div class="kpi-value">$1,006</div><div class="kpi-sub">↑ from $837 in 2018</div></div>
+        <div class="kpi danger"><div class="kpi-label">Net $/Credit Hr</div><div class="kpi-value">$595</div><div class="kpi-sub">↓ from $615 peak (FY21)</div></div>
+        <div class="kpi danger"><div class="kpi-label">Margin $/Credit Hr</div><div class="kpi-value">$347</div><div class="kpi-sub">↓ from $399 (FY20)</div></div>
+        <div class="kpi"><div class="kpi-label">Implied Discount Rate</div><div class="kpi-value">40.8%</div><div class="kpi-sub">Net / Gross per CH</div></div>
+      </div>
+
+      <div class="alert-box amber">
+        <div class="alert-title">📉 The Enrollment-Margin Squeeze</div>
+        Credit hours dropped from 46,552 (2016) to 38,169 (2024) — an 18% volume decline. Meanwhile cost per credit hour rose 38% ($180 → $248). The margin per credit hour fell from $399 to $347. The FY25 revenue increase to $39.5M reflects the D2 athletics enrollment bump, but at higher cost per student.
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="card-title">Credit Hours Trend (2018–2024)</div>
+          <div style="position:relative;height:220px"><canvas id="chChart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Per Credit Hour: Gross vs Net vs Cost vs Margin</div>
+          <div style="position:relative;height:220px"><canvas id="perChChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Online vs Synchronous vs In-Person Margins — FY2024</div>
+        <table>
+          <thead><tr><th>Channel</th><th class="r">Students</th><th class="r">Revenue</th><th class="r">Direct Cost</th><th class="r">Margin</th><th class="r">Margin %</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="label">Grad In-Person (Loc A)</td><td class="r">192</td><td class="r">$1.93M</td><td class="r">$813K</td><td class="r pos">$1.12M</td><td class="r"><span class="pill pill-green">57.9%</span></td><td class="label">Counseling Psych strongest</td></tr>
+            <tr><td class="label">Grad In-Person (Loc B)</td><td class="r">173</td><td class="r">$1.65M</td><td class="r">$417K</td><td class="r pos">$1.24M</td><td class="r"><span class="pill pill-green">74.8%</span></td><td class="label">CS 79% margin — star</td></tr>
+            <tr><td class="label">Synchronous Online (Grad)</td><td class="r">68</td><td class="r">$894K</td><td class="r">$257K</td><td class="r pos">$637K</td><td class="r"><span class="pill pill-green">71.3%</span></td><td class="label">Counseling Psych dominant</td></tr>
+            <tr><td class="label">Synchronous Online (Undergrad)</td><td class="r">38</td><td class="r">$279K</td><td class="r">$162K</td><td class="r pos">$117K</td><td class="r"><span class="pill pill-green">42.1%</span></td><td class="label">BA Psychology, Business</td></tr>
+            <tr><td class="label">Online Async (Undergrad)</td><td class="r">143</td><td class="r">$1.03M</td><td class="r">$406K</td><td class="r pos">$625K</td><td class="r"><span class="pill pill-green">51.0%</span></td><td class="label">CS &amp; Psych lead</td></tr>
+            <tr><td class="label">Online Async (Grad)</td><td class="r">91</td><td class="r">$417K</td><td class="r">$386K</td><td class="r pos">$31K</td><td class="r"><span class="pill pill-amber">40.0%</span></td><td class="label">Kinesiology/Leadership drag</td></tr>
+            <tr><td class="label">Traditional In-Person (Undergrad)</td><td class="r">910</td><td class="r">$16.4M</td><td class="r">$7.0M</td><td class="r pos">$9.4M</td><td class="r"><span class="pill pill-green">57.6%</span></td><td class="label">Core campus population</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ==================== PROGRAMS ==================== -->
+    <div class="view" id="view-programs">
+      <div class="alert-box green">
+        <div class="alert-title">✓ Programs to Invest & Market</div>
+        Computer Science (74% margin), Business (72%), Biology (71%), Biblical Studies (71%), Psychology (68%), Counseling Psychology (69–75% across formats), Kinesiology undergrad (64%), Criminal Justice (61%). Graduate Computer Science location B is the highest-margin program at 79%.
+      </div>
+      <div class="alert-box amber">
+        <div class="alert-title">⚠ Programs to Review / Restructure</div>
+        Music (11%), Theatre (23%), Nursing (24%), Online Kinesiology master's (-6%), Online Leadership master's (-7%), Online Education master's (5.5%). These programs are below the 40% contribution margin threshold needed for financial viability.
+      </div>
+
+      <div class="card">
+        <div class="card-title">Undergraduate In-Person Programs — FY2024 Contribution Margins</div>
+        <div style="position:relative;height:280px"><canvas id="undergradChart"></canvas></div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="card-title">Graduate Programs by Margin</div>
+          <table>
+            <thead><tr><th>Program</th><th>Format</th><th class="r">Students</th><th class="r">Margin %</th><th class="r">Rec.</th></tr></thead>
+            <tbody>
+              <tr><td class="label">CS (Grad, Loc B)</td><td class="label">In-Person</td><td class="r">125</td><td class="r"><span class="pill pill-green">79.2%</span></td><td class="r"><span class="badge badge-green">Grow</span></td></tr>
+              <tr><td class="label">Counseling Psych (Sync)</td><td class="label">Online Sync</td><td class="r">53</td><td class="r"><span class="pill pill-green">74.9%</span></td><td class="r"><span class="badge badge-green">Grow</span></td></tr>
+              <tr><td class="label">Counseling Psych (Loc A)</td><td class="label">In-Person</td><td class="r">102</td><td class="r"><span class="pill pill-green">68.3%</span></td><td class="r"><span class="badge badge-green">Grow</span></td></tr>
+              <tr><td class="label">MBA (Loc B)</td><td class="label">In-Person</td><td class="r">45</td><td class="r"><span class="pill pill-green">61.6%</span></td><td class="r"><span class="badge badge-green">Maintain</span></td></tr>
+              <tr><td class="label">MBA (Loc A)</td><td class="label">In-Person</td><td class="r">22</td><td class="r"><span class="pill pill-green">58.1%</span></td><td class="r"><span class="badge badge-green">Maintain</span></td></tr>
+              <tr><td class="label">Teaching (Sync)</td><td class="label">Online Sync</td><td class="r">15</td><td class="r"><span class="pill pill-amber">47.4%</span></td><td class="r"><span class="badge badge-amber">Monitor</span></td></tr>
+              <tr><td class="label">Teaching (Loc A)</td><td class="label">In-Person</td><td class="r">63</td><td class="r"><span class="pill pill-amber">35.1%</span></td><td class="r"><span class="badge badge-amber">Review</span></td></tr>
+              <tr><td class="label">Accountancy (Loc A)</td><td class="label">In-Person</td><td class="r">5</td><td class="r"><span class="pill pill-amber">29.3%</span></td><td class="r"><span class="badge badge-amber">Review</span></td></tr>
+              <tr><td class="label">Ed (Online Async)</td><td class="label">Online</td><td class="r">23</td><td class="r"><span class="pill pill-red">5.5%</span></td><td class="r"><span class="badge badge-red">Restructure</span></td></tr>
+              <tr><td class="label">Kinesiology (Online)</td><td class="label">Online</td><td class="r">13</td><td class="r"><span class="pill pill-red">-6.1%</span></td><td class="r"><span class="badge badge-red">Close</span></td></tr>
+              <tr><td class="label">Leadership (Online)</td><td class="label">Online</td><td class="r">40</td><td class="r"><span class="pill pill-red">-7.4%</span></td><td class="r"><span class="badge badge-red">Close</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title">Theology & Seminary — Strategic Assessment</div>
+          <div class="alert-box amber" style="margin-bottom:10px">
+            <div class="alert-title">WSCUC Teach-Out Requirement</div>
+            If Jessup discontinues seminary programs, a written teach-out plan must be submitted to and approved by WSCUC <em>before</em> implementation. Students already enrolled must be allowed to complete their degrees.
+          </div>
+          <table>
+            <thead><tr><th>Metric</th><th class="r">Value</th></tr></thead>
+            <tbody>
+              <tr><td class="label">Students enrolled (Theology)</td><td class="r">120</td></tr>
+              <tr><td class="label">Revenue FY24</td><td class="r">$1.21M</td></tr>
+              <tr><td class="label">Direct costs FY24</td><td class="r">$613K</td></tr>
+              <tr><td class="label">Contribution margin</td><td class="r pos">$597K (49.3%)</td></tr>
+              <tr><td class="label">ATS accreditation</td><td class="r"><span class="badge badge-amber">Verify Required</span></td></tr>
+              <tr><td class="label">Teach-out notice period</td><td class="r">90 days to WSCUC</td></tr>
+              <tr><td class="label">Earliest FY27 savings</td><td class="r warn">Partial only</td></tr>
+            </tbody>
+          </table>
+          <div class="section-sub" style="margin-top:10px">Seminary currently generates positive margin. The strategic question is whether resources (faculty FTEs, admin overhead) can be redeployed to higher-margin programs rather than eliminated. A teach-out without ATS separation may be cleaner than full closure.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== ATHLETICS ==================== -->
+    <div class="view" id="view-athletics">
+      <div class="alert-box red">
+        <div class="alert-title">🚨 Critical Context: Jessup Achieved Full D2 Membership July 2025</div>
+        After a 6-year transition process, Jessup was granted full NCAA D2 membership in July 2025. Withdrawal now triggers: (1) Bylaw 3.3.3.5 — must complete full re-entry process to rejoin D2 (3+ years); (2) PacWest conference exit obligations including likely exit fees and 12–18 months notice; (3) Athletic scholarship tail costs — current athletes on aid cannot be cut for program elimination; they must be honored through graduation or voluntary transfer. Full savings cannot be realized until FY28–29 at earliest.
+      </div>
+
+      <div class="kpi-row">
+        <div class="kpi danger"><div class="kpi-label">FY24 Athletics Net</div><div class="kpi-value">($848K)</div><div class="kpi-sub">First negative year in history</div></div>
+        <div class="kpi"><div class="kpi-label">Total Athletes</div><div class="kpi-value">351</div><div class="kpi-sub">23.9% of all students</div></div>
+        <div class="kpi"><div class="kpi-label">Sports Offered</div><div class="kpi-value">21</div><div class="kpi-sub">Including JV programs</div></div>
+        <div class="kpi danger"><div class="kpi-label">Men's Basketball</div><div class="kpi-value">($443K)</div><div class="kpi-sub">Worst single sport</div></div>
+        <div class="kpi danger"><div class="kpi-label">Women's Basketball</div><div class="kpi-value">($265K)</div><div class="kpi-sub">2nd worst single sport</div></div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="card-title">Athletics Contribution Margin Trend (2015–2024)</div>
+          <div style="position:relative;height:220px"><canvas id="athleticsTrendChart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">FY2024 — Sport Contribution (Sorted)</div>
+          <div style="position:relative;height:220px"><canvas id="sportChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Sport-by-Sport FY2024 — Full Breakdown</div>
+        <table>
+          <thead><tr><th>Sport</th><th class="r">Athletes</th><th class="r">Tuition Revenue</th><th class="r">Athletic Costs</th><th class="r">Net Contribution</th><th class="r">Per Athlete</th><th class="r">Action</th></tr></thead>
+          <tbody id="sportsTable"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title">D2 Exit — Timeline & Legal Reality</div>
+        <table>
+          <thead><tr><th>Decision Point</th><th>Requirement</th><th class="r">Timeline</th><th class="r">FY Impact</th></tr></thead>
+          <tbody>
+            <tr><td class="label">Board votes to exit D2</td><td class="label">Board resolution required</td><td class="r">FY26 Q1</td><td class="r warn">$0 saved</td></tr>
+            <tr><td class="label">Written notice to NCAA + PacWest</td><td class="label">Bylaw 3.3.3.5; conference agreement</td><td class="r">FY26 Q1–Q2</td><td class="r warn">Exit fee TBD</td></tr>
+            <tr><td class="label">Stop new athletic scholarship offers</td><td class="label">July 1 renewal deadline</td><td class="r">FY26 July 1</td><td class="r">Partial savings begin</td></tr>
+            <tr><td class="label">Honor existing scholarship commitments</td><td class="label">NCAA Bylaw 15.3 — cannot cut for program elimination</td><td class="r">FY26–FY29</td><td class="r neg">Scholarship tail cost</td></tr>
+            <tr><td class="label">Coaching contracts wind down</td><td class="label">Employment contracts, WARN Act if large</td><td class="r">FY26–FY27</td><td class="r">Severance costs</td></tr>
+            <tr><td class="label">Last competitive season</td><td class="label">Conference scheduling obligations</td><td class="r">FY27</td><td class="r warn">Partial year costs</td></tr>
+            <tr class="total"><td class="label">Net FY27 savings (realistic)</td><td class="label">After scholarship tail and severance</td><td class="r"></td><td class="r pos">$400K–$1.2M</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ==================== SCENARIOS ==================== -->
+    <div class="view" id="view-scenarios">
+      <div class="section-title">FY27 Business Plan — Scenario Modeling</div>
+      <div class="section-sub">Select one scenario per category. The FY27 projected P&L updates automatically. Starting base: FY2025 Revenue $39.5M | Expenses $49.3M | Deficit ($9.83M)</div>
+
+      <!-- ATHLETICS SCENARIO -->
+      <div class="section-title" style="margin-top:4px">1. Athletics Strategy</div>
+      <div class="scenario-grid" id="athScenarios">
+        <div class="scenario-card selected" onclick="selectScenario('ath',0,this)">
+          <div class="sc-title">D2 Status Quo</div>
+          <div class="sc-sub">Keep all 21 sports, honor all D2 commitments. Accept ongoing athletics subsidy.</div>
+          <div class="sc-impact neg">FY27 Athletics Impact: ($848K)</div>
+        </div>
+        <div class="scenario-card" onclick="selectScenario('ath',1,this)">
+          <div class="sc-title">Partial Restructure</div>
+          <div class="sc-sub">Eliminate 8 worst-performing sports (basketball×2, volleyball, softball, baseball, tennis). Retain viable sports.</div>
+          <div class="sc-impact pos">FY27 Estimated Savings: +$600K–$900K</div>
+        </div>
+        <div class="scenario-card" onclick="selectScenario('ath',2,this)">
+          <div class="sc-title">Exit D2 → Club Only</div>
+          <div class="sc-sub">Full D2 withdrawal. Club sports only. Note: FY27 savings limited by scholarship tail costs. Full savings in FY28–29.</div>
+          <div class="sc-impact warn">FY27 Realistic Net Savings: ~$600K</div>
+        </div>
+      </div>
+
+      <!-- SEMINARY SCENARIO -->
+      <div class="section-title">2. Seminary / Theology Strategy</div>
+      <div class="scenario-grid" id="semScenarios">
+        <div class="scenario-card selected" onclick="selectScenario('sem',0,this)">
+          <div class="sc-title">Keep as Positioned</div>
+          <div class="sc-sub">Maintain School of Theology & Leadership at current enrollment (120 students). Currently generating $597K contribution margin.</div>
+          <div class="sc-impact pos">FY27 Impact: $597K positive contribution</div>
+        </div>
+        <div class="scenario-card" onclick="selectScenario('sem',1,this)">
+          <div class="sc-title">Consolidate & Refocus</div>
+          <div class="sc-sub">Close low-enrollment programs, refocus on online ministry leadership. Reduce faculty FTEs, maintain accreditation.</div>
+          <div class="sc-impact warn">FY27 Net: $300K–$450K (reduced scale)</div>
+        </div>
+        <div class="scenario-card" onclick="selectScenario('sem',2,this)">
+          <div class="sc-title">Teach-Out Plan (FY26 start)</div>
+          <div class="sc-sub">Stop admissions FY26, teach-out existing students. WSCUC plan required 90 days before implementation. ATS accreditation review needed.</div>
+          <div class="sc-impact neg">FY27: Teach-out costs ~($150K). Savings FY28+</div>
+        </div>
+      </div>
+
+      <!-- ADMIN SCENARIO -->
+      <div class="section-title">3. Administration & Operations</div>
+      <div class="scenario-grid" id="adminScenarios">
+        <div class="scenario-card selected" onclick="selectScenario('admin',0,this)">
+          <div class="sc-title">Current Structure</div>
+          <div class="sc-sub">Maintain current administrative headcount and departmental structure with modest efficiencies.</div>
+          <div class="sc-impact warn">FY27 Admin Cost: ~$8.2M (est.)</div>
+        </div>
+        <div class="scenario-card" onclick="selectScenario('admin',1,this)">
+          <div class="sc-title">Lean + AI-Enabled</div>
+          <div class="sc-sub">Consolidate enrollment, marketing, IT. Deploy AI tools for advising, support, administration. Target 20–25% admin cost reduction.</div>
+          <div class="sc-impact pos">FY27 Savings: $1.6M–$2.0M</div>
+        </div>
+        <div class="scenario-card" onclick="selectScenario('admin',2,this)">
+          <div class="sc-title">Full Reorganization</div>
+          <div class="sc-sub">Restructure all administrative functions. Shared services model. Reduce non-instructional FTEs by 30%. Requires severance investment.</div>
+          <div class="sc-impact pos">FY27 Net Savings: $2.4M–$3.0M</div>
+        </div>
+      </div>
+
+      <!-- ENROLLMENT SCENARIO -->
+      <div class="section-title">4. Enrollment Growth Target</div>
+      <div class="scenario-grid" id="enrollScenarios">
+        <div class="scenario-card selected" onclick="selectScenario('enroll',0,this)">
+          <div class="sc-title">Flat / Status Quo</div>
+          <div class="sc-sub">No significant enrollment intervention. Same mix, same discount rate (~41%). Revenue grows modestly with tuition increases only.</div>
+          <div class="sc-impact warn">FY27 Revenue: ~$40.5M</div>
+        </div>
+        <div class="scenario-card" onclick="selectScenario('enroll',1,this)">
+          <div class="sc-title">Targeted Growth +8%</div>
+          <div class="sc-sub">Focused marketing on CS, Business, Psychology, online graduate. 150 additional credit hours via targeted program investment.</div>
+          <div class="sc-impact pos">FY27 Revenue: ~$43.5M</div>
+        </div>
+        <div class="scenario-card" onclick="selectScenario('enroll',2,this)">
+          <div class="sc-title">Aggressive Growth +15%</div>
+          <div class="sc-sub">Major investment in enrollment marketing, new program launches, transfer pipeline, dual enrollment expansion.</div>
+          <div class="sc-impact pos">FY27 Revenue: ~$46.5M</div>
+        </div>
+      </div>
+
+      <!-- FY27 P&L PROJECTION -->
+      <div class="card" style="border-left:3px solid var(--green)">
+        <div class="card-title">FY27 Projected P&L — Based on Selected Scenarios</div>
+        <div class="grid2" style="margin-bottom:12px">
+          <table>
+            <thead><tr><th>Revenue</th><th class="r">FY25 Actual</th><th class="r">FY27 Projected</th><th class="r">Change</th></tr></thead>
+            <tbody>
+              <tr><td class="label">Net Tuition & Fees</td><td class="r">$33.2M</td><td class="r" id="fy27-tuition">—</td><td class="r" id="fy27-tuition-chg">—</td></tr>
+              <tr><td class="label">Room & Board / Aux</td><td class="r">$4.2M</td><td class="r">$4.4M</td><td class="r pos">+$0.2M</td></tr>
+              <tr><td class="label">Gifts & Grants</td><td class="r">$2.1M</td><td class="r">$2.3M</td><td class="r pos">+$0.2M</td></tr>
+              <tr class="total"><td class="label">Total Revenue</td><td class="r">$39.5M</td><td class="r" id="fy27-rev">—</td><td class="r" id="fy27-rev-chg">—</td></tr>
+            </tbody>
+          </table>
+          <table>
+            <thead><tr><th>Expenses</th><th class="r">FY25 Actual</th><th class="r">FY27 Projected</th><th class="r">Change</th></tr></thead>
+            <tbody>
+              <tr><td class="label">Instruction & Academic</td><td class="r">$18.1M</td><td class="r">$18.5M</td><td class="r">+$0.4M</td></tr>
+              <tr><td class="label">Student Services</td><td class="r">$5.2M</td><td class="r">$5.4M</td><td class="r">+$0.2M</td></tr>
+              <tr><td class="label">Administration</td><td class="r">$8.2M</td><td class="r" id="fy27-admin">—</td><td class="r" id="fy27-admin-chg">—</td></tr>
+              <tr><td class="label">Athletics</td><td class="r">$6.4M</td><td class="r" id="fy27-ath">—</td><td class="r" id="fy27-ath-chg">—</td></tr>
+              <tr><td class="label">Facilities & Debt</td><td class="r">$7.2M</td><td class="r">$7.3M</td><td class="r">+$0.1M</td></tr>
+              <tr><td class="label">Seminary (net change)</td><td class="r">$0.6M</td><td class="r" id="fy27-sem">—</td><td class="r" id="fy27-sem-chg">—</td></tr>
+              <tr class="total"><td class="label">Total Expenses</td><td class="r">$49.3M</td><td class="r" id="fy27-exp">—</td><td class="r" id="fy27-exp-chg">—</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="background:var(--surface2);border-radius:var(--radius);padding:14px;display:flex;align-items:center;gap:20px">
+          <div>
+            <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3)">FY27 Projected Net</div>
+            <div style="font-family:var(--mono);font-size:28px;font-weight:300" id="fy27-net">—</div>
+          </div>
+          <div style="flex:1">
+            <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);margin-bottom:6px">Path to Sustainability Assessment</div>
+            <div id="fy27-assessment" style="font-size:12px;line-height:1.6;color:var(--text2)">Select scenarios above to see assessment.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== LTV ==================== -->
+    <div class="view" id="view-ltv">
+      <div class="section-title">Student Lifetime Value Model</div>
+      <div class="section-sub">Jessup-calibrated defaults: $42K gross tuition, 41% discount rate, $595 net/CH, avg 910 traditional undergrad students. Adjust to model FY27 cohort economics.</div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;min-height:600px">
+        <iframe src="index.html" style="width:100%;height:680px;border:none" id="ltvFrame"></iframe>
+      </div>
+      <div class="alert-box amber" style="margin-top:12px">
+        <div class="alert-title">⚠ Jessup-Specific LTV Considerations</div>
+        With athletes at 23.9% of enrollment: eliminating sports eliminates ~280 students (est. 80% wouldn't re-enroll without their sport), reducing annual net tuition revenue by ~$3.6M. This must be offset against the athletic operational savings of ~$1.6M to get a true net figure. The real question is whether replacement non-athlete enrollment can fill that gap — and at what recruitment cost.
+      </div>
+    </div>
+
+    <!-- ==================== WASC ==================== -->
+    <div class="view" id="view-wasc">
+      <div class="section-title">WSCUC Financial Viability — Readiness Assessment</div>
+      <div class="section-sub">WSCUC Standard 3 requires demonstrated financial health, sustainability, and adequate resources to fulfill the educational mission. Current deficit trajectory will trigger enhanced monitoring. This view maps each standard to Jessup's current status and required actions.</div>
+
+      <div class="kpi-row">
+        <div class="kpi danger"><div class="kpi-label">Standard 3 Status</div><div class="kpi-value">At Risk</div><div class="kpi-sub">Accelerating deficits</div></div>
+        <div class="kpi amber"><div class="kpi-label">WSCUC Action Required</div><div class="kpi-value">FY26 Plan</div><div class="kpi-sub">3-year plan needed</div></div>
+        <div class="kpi"><div class="kpi-label">Next Review</div><div class="kpi-value">TBD</div><div class="kpi-sub">Consult WSCUC VP</div></div>
+        <div class="kpi amber"><div class="kpi-label">Teach-Out (if needed)</div><div class="kpi-value">90 Days</div><div class="kpi-sub">Notice before implementation</div></div>
+        <div class="kpi"><div class="kpi-label">Board Resolution Required</div><div class="kpi-value">Yes</div><div class="kpi-sub">For any program closure</div></div>
+      </div>
+
+      <div class="grid2">
+        <div>
+          <div class="card-title" style="margin-bottom:8px">WSCUC Standard 3 — CFR Compliance Checklist</div>
+
+          <div class="wasc-item">
+            <div class="wasc-icon fail">✗</div>
+            <div class="wasc-content">
+              <div class="wasc-label">CFR 3.1 — Financial Sustainability</div>
+              <div class="wasc-desc">Institution must demonstrate financial stability and long-term sustainability. Current trajectory: 4 consecutive deficit years, growing from ($5.2M) to ($9.8M).</div>
+              <div class="wasc-action">→ ACTION: Board-approved 3-year turnaround plan with specific milestones required.</div>
+            </div>
+          </div>
+          <div class="wasc-item">
+            <div class="wasc-icon fail">✗</div>
+            <div class="wasc-content">
+              <div class="wasc-label">CFR 3.3 — Financial Management</div>
+              <div class="wasc-desc">Expenses growing 44% vs revenue 10%. Cost structure not aligned with revenue capacity. Admin overhead appears high relative to enrollment.</div>
+              <div class="wasc-action">→ ACTION: Independent financial audit recommendation; CFO-led expense benchmark analysis.</div>
+            </div>
+          </div>
+          <div class="wasc-item">
+            <div class="wasc-icon warn">!</div>
+            <div class="wasc-content">
+              <div class="wasc-label">CFR 3.4 — Strategic Planning Integration</div>
+              <div class="wasc-desc">Evidence of strategic planning linked to financial projections. The transformation plan being developed here directly addresses this requirement.</div>
+              <div class="wasc-action">→ ACTION: Document formal strategic planning process with board oversight records.</div>
+            </div>
+          </div>
+          <div class="wasc-item">
+            <div class="wasc-icon warn">!</div>
+            <div class="wasc-content">
+              <div class="wasc-label">CFR 3.6 — Reserves & Liquidity</div>
+              <div class="wasc-desc">Adequate liquid reserves to sustain operations. The Multnomah acquisition (closed May 2025) and associated debt may impact liquidity.</div>
+              <div class="wasc-action">→ ACTION: Provide WSCUC with current days cash on hand and debt service coverage ratios.</div>
+            </div>
+          </div>
+          <div class="wasc-item">
+            <div class="wasc-icon pass">✓</div>
+            <div class="wasc-content">
+              <div class="wasc-label">CFR 3.7 — Program Contribution Evidence</div>
+              <div class="wasc-desc">The program margin data uploaded here (by school, program, format) directly fulfills WSCUC's expectation for evidence-based program review.</div>
+              <div class="wasc-action">→ STRENGTH: Existing simulator data can be reformatted as WSCUC-ready program review documentation.</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card-title" style="margin-bottom:8px">3-Year Business Model Narrative (FY26–FY28)</div>
+          <div class="card" style="margin-bottom:8px">
+            <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:6px">Year 1 (FY26) — Stabilize</div>
+            <div style="font-size:11px;color:var(--text3);line-height:1.7">
+              • Board approves financial transformation plan<br>
+              • Implement admin reorganization + AI capabilities<br>
+              • Stop admissions to negative-margin programs<br>
+              • If athletics exit: announce, begin conference notice<br>
+              • WSCUC: Submit interim financial report<br>
+              • <strong style="color:var(--amber)">Target: Reduce deficit to ($5M–$6M)</strong>
+            </div>
+          </div>
+          <div class="card" style="margin-bottom:8px">
+            <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:6px">Year 2 (FY27) — Transform</div>
+            <div style="font-size:11px;color:var(--text3);line-height:1.7">
+              • Full admin restructure savings realized<br>
+              • Enrollment growth in targeted programs begins<br>
+              • Teach-out programs running at reduced cost<br>
+              • Athletics: last competitive year (if exiting) or restructured<br>
+              • New program launches: AI, Health Sciences, CS expansion<br>
+              • <strong style="color:var(--green)">Target: Break even or ($1M–$2M)</strong>
+            </div>
+          </div>
+          <div class="card">
+            <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:6px">Year 3 (FY28) — Growth</div>
+            <div style="font-size:11px;color:var(--text3);line-height:1.7">
+              • Return to operating surplus<br>
+              • Full savings from FY26 decisions now reflected<br>
+              • WSCUC reaffirmation: demonstrate sustained improvement<br>
+              • Begin building financial reserves<br>
+              • Alumni giving program expansion on improved outcomes<br>
+              • <strong style="color:var(--green)">Target: $1M–$3M surplus</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+// ============= DATA =============
+const IS = {
+  years:[2020,2021,2022,2023,2024,2025],
+  rev:[36025555,35480758,34859502,35003500,35872903,39479602],
+  exp:[34078765,35045594,40024335,39060011,44300360,49311565]
+};
+const CH = {
+  years:[2018,2019,2020,2021,2022,2023,2024],
+  gross:[837,888,932,973,985,983,1006],
+  net:[529,555,580,615,605,596,595],
+  cost:[180,175,181,218,223,233,248],
+  margin:[349,380,399,397,382,362,347],
+  ch:[42561,46552,46391,43116,39268,37602,38169]
+};
+const SPORTS = [
+  {s:"Men's Basketball",a:19,r:64989,c:507668,m:-442720},
+  {s:"Women's Basketball",a:20,r:240586,c:505770,m:-265271},
+  {s:"Women's Volleyball",a:19,r:228065,c:389150,m:-161444},
+  {s:"Women's Softball",a:20,r:300201,c:417619,m:-117568},
+  {s:"Men's Baseball",a:58,r:788621,c:894273,m:-106635},
+  {s:"Women's Tennis",a:9,r:117465,c:149014,m:-31567},
+  {s:"Women's Soccer",a:28,r:450453,c:480161,m:-29993},
+  {s:"Women's Golf",a:10,r:124423,c:149478,m:-25707},
+  {s:"Men's Cross Country",a:7,r:45359,c:58556,m:-14529},
+  {s:"Women's Cross Country",a:6,r:28544,c:35425,m:-6893},
+  {s:"Women's IT&F",a:14,r:98499,c:102745,m:-4334},
+  {s:"Men's Tennis",a:12,r:198427,c:199226,m:-1138},
+  {s:"Men's Golf",a:16,r:247073,c:243941,m:2903},
+  {s:"Women's JV Basketball",a:2,r:23736,c:20550,m:3182},
+  {s:"Men's Track",a:20,r:263382,c:258299,m:3699},
+  {s:"Women's JV Volleyball",a:5,r:81518,c:71374,m:10127},
+  {s:"Men's Soccer",a:34,r:497796,c:489995,m:7689},
+  {s:"Women's OT&F",a:16,r:144474,c:132070,m:12289},
+  {s:"JV Men's Basketball",a:12,r:198928,c:143316,m:55431},
+  {s:"Women's Stunt",a:42,r:744873,c:643061,m:101660},
+  {s:"JV Men's Baseball",a:15,r:306159,c:143225,m:162912},
+];
+const UGPROG = [
+  {p:"Computer Science",pct:0.742,st:23},{p:"Business",pct:0.720,st:141},{p:"Biology",pct:0.711,st:130},
+  {p:"Biblical Studies",pct:0.711,st:25},{p:"Psychology",pct:0.687,st:76},{p:"Kinesiology",pct:0.643,st:50},
+  {p:"Criminal Justice",pct:0.613,st:39},{p:"Accounting",pct:0.643,st:12},{p:"Mathematics",pct:0.651,st:14},
+  {p:"Exercise Science",pct:0.623,st:30},{p:"Liberal Studies",pct:0.513,st:79},{p:"Aviation",pct:0.409,st:25},
+  {p:"Leadership",pct:0.468,st:24},{p:"English",pct:0.401,st:17},{p:"Biochemistry",pct:0.500,st:14},
+  {p:"Nursing",pct:0.245,st:75},{p:"Theatre",pct:0.234,st:24},{p:"Music",pct:0.108,st:28}
+];
+const ATH_TREND = {
+  years:[2015,2016,2017,2018,2019,2020,2021,2022,2023,2024],
+  total:[797027,855140,1016964,652295,652886,826932,1194900,521107,232232,-847907]
+};
+
+// Scenario state
+const scenarios = {ath:0,sem:0,admin:0,enroll:0};
+const scenarioEffects = {
+  ath:[{rev:0,exp:0},{rev:-800000,exp:-1600000},{rev:-1200000,exp:-2000000}],
+  sem:[{rev:0,exp:0},{rev:-200000,exp:-150000},{rev:-600000,exp:-450000}],
+  admin:[{rev:0,exp:0},{rev:0,exp:-1800000},{rev:0,exp:-2700000}],
+  enroll:[{rev:0,exp:200000},{rev:3200000,exp:800000},{rev:6500000,exp:1500000}]
+};
+
+function selectScenario(cat,idx,el){
+  scenarios[cat]=idx;
+  document.querySelectorAll('#'+cat+'Scenarios .scenario-card').forEach(c=>{
+    c.classList.remove('selected','selected-red','selected-amber');
+  });
+  el.classList.add(idx===0?'selected-amber':idx===1?'selected':'selected');
+  updateFY27();
+}
+
+function fmt(n,dec=0){
+  const abs=Math.abs(n);
+  const sign=n<0?'(':'';
+  const end=n<0?')':'';
+  if(abs>=1e6) return sign+'$'+(abs/1e6).toFixed(1)+'M'+end;
+  if(abs>=1e3) return sign+'$'+(abs/1e3).toFixed(0)+'K'+end;
+  return sign+'$'+abs.toLocaleString()+end;
+}
+
+function updateFY27(){
+  const baseRev=39479602, baseExp=49311565;
+  let dRev=0,dExp=0;
+  ['ath','sem','admin','enroll'].forEach(k=>{
+    const e=scenarioEffects[k][scenarios[k]];
+    dRev+=e.rev; dExp+=e.exp;
+  });
+  const projRev=baseRev+dRev;
+  const projExp=baseExp+dExp;
+  const projNet=projRev-projExp;
+
+  const tuitionBase=33200000, tuitionProj=tuitionBase+(dRev*0.85);
+  document.getElementById('fy27-tuition').textContent=fmt(tuitionProj);
+  document.getElementById('fy27-tuition-chg').innerHTML=`<span class="${tuitionProj>tuitionBase?'pos':'neg'}">${fmt(tuitionProj-tuitionBase)}</span>`;
+  document.getElementById('fy27-rev').textContent=fmt(projRev);
+  document.getElementById('fy27-rev-chg').innerHTML=`<span class="${dRev>0?'pos':'neg'}">${fmt(dRev)}</span>`;
+
+  const adminBase=8200000, athBase=6400000, semBase=600000;
+  const adminProj=adminBase+scenarioEffects.admin[scenarios.admin].exp;
+  const athProj=athBase+(scenarioEffects.ath[scenarios.ath].exp||0);
+  const semProj=semBase+(scenarioEffects.sem[scenarios.sem].exp||0);
+  document.getElementById('fy27-admin').textContent=fmt(adminProj);
+  document.getElementById('fy27-admin-chg').innerHTML=`<span class="${adminProj<adminBase?'pos':'neg'}">${fmt(adminProj-adminBase)}</span>`;
+  document.getElementById('fy27-ath').textContent=fmt(athProj);
+  document.getElementById('fy27-ath-chg').innerHTML=`<span class="${athProj<athBase?'pos':'neg'}">${fmt(athProj-athBase)}</span>`;
+  document.getElementById('fy27-sem').textContent=fmt(semProj);
+  document.getElementById('fy27-sem-chg').innerHTML=`<span class="${semProj<semBase?'pos':'neg'}">${fmt(semProj-semBase)}</span>`;
+  document.getElementById('fy27-exp').textContent=fmt(projExp);
+  document.getElementById('fy27-exp-chg').innerHTML=`<span class="${dExp<0?'pos':'neg'}">${fmt(dExp)}</span>`;
+
+  const netEl=document.getElementById('fy27-net');
+  netEl.textContent=fmt(projNet);
+  netEl.className='';
+  netEl.style.fontFamily='var(--mono)';
+  netEl.style.fontSize='28px';
+  netEl.style.fontWeight='300';
+  netEl.style.color=projNet>0?'var(--green)':projNet>-3000000?'var(--amber)':'var(--red)';
+
+  let assessment='';
+  if(projNet>0) assessment='✅ This scenario combination achieves a FY27 operating surplus. A sustainable path forward — document this for WSCUC Standard 3.';
+  else if(projNet>-3000000) assessment='⚠ FY27 deficit is materially reduced but not eliminated. Strong progress — present this as Year 2 of a 3-year plan to WSCUC, with FY28 surplus clearly projected.';
+  else if(projNet>-6000000) assessment='⚠ Meaningful deficit reduction but more intervention needed. Consider layering additional scenarios or accelerating enrollment growth targets.';
+  else assessment='🔴 This combination does not reduce the deficit significantly. Additional cost reduction or revenue growth required. WSCUC will expect more aggressive action given current trajectory.';
+  document.getElementById('fy27-assessment').textContent=assessment;
+}
+
+// ============= CHARTS =============
+let charts={};
+function makeChart(id,config){
+  const ctx=document.getElementById(id);
+  if(!ctx) return;
+  if(charts[id]) charts[id].destroy();
+  charts[id]=new Chart(ctx,config);
+}
+
+const green='#1f6b3a', greenL='rgba(31,107,58,0.15)', red='#b91c1c', redL='rgba(185,28,28,0.15)', amber='#b45309', blue='#1d4ed8';
+
+function initCharts(){
+  // Overview
+  makeChart('overviewChart',{type:'line',data:{labels:IS.years,datasets:[
+    {label:'Revenue',data:IS.rev.map(v=>+(v/1e6).toFixed(2)),borderColor:green,backgroundColor:greenL,fill:true,tension:0.3,pointRadius:4},
+    {label:'Expenses',data:IS.exp.map(v=>+(v/1e6).toFixed(2)),borderColor:red,backgroundColor:redL,fill:true,tension:0.3,pointRadius:4}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' $'+c.raw+'M'}}},scales:{y:{ticks:{callback:v=>'$'+v+'M',font:{family:'DM Mono',size:10}},grid:{color:'#f0ede6'}},x:{ticks:{font:{family:'DM Sans',size:11}},grid:{display:false}}}}});
+
+  const nets=IS.rev.map((r,i)=>+(( r-IS.exp[i])/1e6).toFixed(2));
+  makeChart('deficitChart',{type:'bar',data:{labels:IS.years,datasets:[{label:'Net',data:nets,backgroundColor:nets.map(v=>v>=0?green:red),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' $'+c.raw+'M'}}},scales:{y:{ticks:{callback:v=>'$'+v+'M',font:{family:'DM Mono',size:10}},grid:{color:'#f0ede6'}},x:{ticks:{font:{family:'DM Sans',size:11}},grid:{display:false}}}}});
+
+  // Revenue
+  makeChart('chChart',{type:'line',data:{labels:CH.years,datasets:[{label:'Credit Hours',data:CH.ch,borderColor:blue,tension:0.3,pointRadius:4,fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.raw.toLocaleString()+' CH'}}},scales:{y:{ticks:{callback:v=>v.toLocaleString(),font:{family:'DM Mono',size:10}},grid:{color:'#f0ede6'}},x:{ticks:{font:{family:'DM Sans',size:11}},grid:{display:false}}}}});
+
+  makeChart('perChChart',{type:'line',data:{labels:CH.years,datasets:[
+    {label:'Gross $/CH',data:CH.gross,borderColor:'#6b7280',tension:0.3,pointRadius:3,borderDash:[4,3]},
+    {label:'Net $/CH',data:CH.net,borderColor:blue,tension:0.3,pointRadius:3},
+    {label:'Cost $/CH',data:CH.cost,borderColor:red,tension:0.3,pointRadius:3},
+    {label:'Margin $/CH',data:CH.margin,borderColor:green,tension:0.3,pointRadius:3,borderWidth:2}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>'$'+v,font:{family:'DM Mono',size:10}},grid:{color:'#f0ede6'}},x:{ticks:{font:{family:'DM Sans',size:11}},grid:{display:false}}}}});
+
+  // Programs
+  const sortedProg=[...UGPROG].sort((a,b)=>b.pct-a.pct);
+  makeChart('undergradChart',{type:'bar',data:{labels:sortedProg.map(p=>p.p),datasets:[{label:'Margin %',data:sortedProg.map(p=>Math.round(p.pct*100)),backgroundColor:sortedProg.map(p=>p.pct>=0.6?green:p.pct>=0.4?amber:red),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.raw+'% margin'}}},scales:{x:{ticks:{callback:v=>v+'%',font:{family:'DM Mono',size:10}},grid:{color:'#f0ede6'}},y:{ticks:{font:{family:'DM Sans',size:10}},grid:{display:false}}}}});
+
+  // Athletics trend
+  makeChart('athleticsTrendChart',{type:'bar',data:{labels:ATH_TREND.years,datasets:[{label:'Total Contribution',data:ATH_TREND.total.map(v=>Math.round(v/1000)),backgroundColor:ATH_TREND.total.map(v=>v>=0?green:red),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' $'+(c.raw<0?'(':'')+Math.abs(c.raw)+'K'+(c.raw<0?')':'')}}},scales:{y:{ticks:{callback:v=>'$'+v+'K',font:{family:'DM Mono',size:10}},grid:{color:'#f0ede6'}},x:{ticks:{font:{family:'DM Sans',size:11}},grid:{display:false}}}}});
+
+  // Sport chart
+  const sortedSports=[...SPORTS].sort((a,b)=>a.m-b.m);
+  makeChart('sportChart',{type:'bar',data:{labels:sortedSports.map(s=>s.s.length>18?s.s.substring(0,16)+'…':s.s),datasets:[{label:'Contribution',data:sortedSports.map(s=>Math.round(s.m/1000)),backgroundColor:sortedSports.map(s=>s.m>=0?green:red),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' $'+(c.raw<0?'(':'')+Math.abs(c.raw)+'K'+(c.raw<0?')':'')}}},scales:{x:{ticks:{callback:v=>'$'+v+'K',font:{family:'DM Mono',size:10}},grid:{color:'#f0ede6'}},y:{ticks:{font:{family:'DM Sans',size:9}},grid:{display:false}}}}});
+}
+
+// Sports table
+function buildSportsTable(){
+  const sorted=[...SPORTS].sort((a,b)=>a.m-b.m);
+  const tbody=document.getElementById('sportsTable');
+  let html='';
+  sorted.forEach(s=>{
+    const cls=s.m>0?'pos':'neg';
+    const perAth=s.m/s.a;
+    let action=s.m>50000?'<span class="badge badge-green">Keep</span>':s.m>0?'<span class="badge badge-blue">Monitor</span>':s.m>-20000?'<span class="badge badge-amber">Review</span>':'<span class="badge badge-red">Restructure</span>';
+    html+=`<tr><td class="label">${s.s}</td><td class="r">${s.a}</td><td class="r">$${(s.r/1000).toFixed(0)}K</td><td class="r">$${(s.c/1000).toFixed(0)}K</td><td class="r ${cls}">${s.m<0?'(':''}$${Math.abs(s.m/1000).toFixed(0)}K${s.m<0?')':''}</td><td class="r ${cls}">${s.m<0?'(':''}$${Math.abs(perAth).toFixed(0)}${s.m<0?')':''}</td><td class="r">${action}</td></tr>`;
+  });
+  tbody.innerHTML=html;
+}
+
+// Navigation
+const pages={
+  'overview':'Financial Overview',
+  'revenue':'Revenue & Enrollment',
+  'programs':'Programs & Margins',
+  'athletics':'Athletics Analysis',
+  'scenarios':'FY27 Scenario Model',
+  'ltv':'Student LTV Model',
+  'wasc':'WASC Readiness'
+};
+const subs={
+  'overview':'FY2020–FY2025 actuals · School contribution margins',
+  'revenue':'Credit hour trends · Channel margins · Tuition economics',
+  'programs':'Program-level contribution margins · Strategic recommendations',
+  'athletics':'Sport-by-sport margins · D2 exit analysis · Scholarship obligations',
+  'scenarios':'FY27 business plan · Scenario toggles · Path to sustainability',
+  'ltv':'Student lifetime value · Cohort unit economics',
+  'wasc':'WSCUC Standard 3 readiness · 3-year narrative framework'
+};
+
+function showView(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{if(n.textContent.trim().toLowerCase().includes(id.toLowerCase().split('-')[0])||n.getAttribute('onclick')?.includes(id))n.classList.add('active')});
+  document.getElementById('page-title').textContent=pages[id]||id;
+  document.getElementById('page-sub').textContent=subs[id]||'';
+  // lazy init charts
+  setTimeout(()=>{initCharts();},50);
+}
+
+// Init
+window.addEventListener('load',()=>{
+  initCharts();
+  buildSportsTable();
+  updateFY27();
+});
+</script>
 </body>
 </html>
