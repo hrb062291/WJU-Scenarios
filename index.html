@@ -314,9 +314,9 @@ input[type=number]:focus{border-color:var(--g);background:#fff}
         <div class="ab amber" style="margin-bottom:10px"><div class="at">Select Keep D2 / Limited / Eliminate per sport. "Limited" stops new recruiting (~25% cost savings). "Eliminate" saves operational costs but ~70% of athletes transfer, reducing tuition revenue. D2 exit costs are modeled separately below.</div></div>
         <div class="card" style="padding:10px">
           <table class="ctrl-table">
-            <thead><tr><th>Sport</th><th class="r">Athletes</th><th class="r">FY24 Net</th><th class="c" style="min-width:180px">FY27 Decision</th><th class="r">Op Savings</th><th class="r">Tuition Lost</th><th class="r">Net Impact</th></tr></thead>
+            <thead><tr><th>Sport</th><th class="r">Athletes</th><th class="r">FY24 Net</th><th class="c" style="color:var(--bl)">FY24 NTR/Athlete</th><th class="c" style="min-width:180px">FY27 Decision</th><th class="r">Op Savings</th><th class="r">Tuition Lost</th><th class="r">Net Impact</th></tr></thead>
             <tbody id="ath-ctrl-tbody"></tbody>
-            <tfoot><tr class="tot"><td class="lab">Athletics Totals</td><td class="r" id="ath-tot-ath">351</td><td class="r neg">($848K)</td><td></td><td class="r pos" id="ath-tot-save">$0</td><td class="r neg" id="ath-tot-loss">$0</td><td class="r impact-cell" id="ath-tot-imp">$0</td></tr></tfoot>
+            <tfoot><tr class="tot"><td class="lab">Athletics Totals</td><td class="r" id="ath-tot-ath">351</td><td class="r neg">($848K)</td><td class="c" style="color:var(--tx3);font-size:10px">$13,525 avg</td><td></td><td class="r pos" id="ath-tot-save">$0</td><td class="r neg" id="ath-tot-loss">$0</td><td class="r impact-cell" id="ath-tot-imp">$0</td></tr></tfoot>
           </table>
         </div>
 
@@ -340,6 +340,11 @@ input[type=number]:focus{border-color:var(--g);background:#fff}
               <div class="slrow">
                 <label>Avg remaining scholarship years</label>
                 <input type="number" id="d2-schol-yrs" value="2.1" min="0" max="4" step="0.1" style="width:100px" oninput="updateAthTotals()">
+              </div>
+              <div class="slrow">
+                <label>% of athletes staying (not departing)<br><span style="font-size:9px;color:var(--tx3)">Scholarship tail only applies to athletes who remain enrolled</span></label>
+                <input type="number" id="d2-schol-stay-pct" value="60" min="0" max="100" step="5" style="width:100px" oninput="updateAthTotals()">
+                <span style="font-size:10px;color:var(--tx3)">%</span>
               </div>
             </div>
             <div>
@@ -577,6 +582,15 @@ input[type=number]:focus{border-color:var(--g);background:#fff}
 const IS={years:[2020,2021,2022,2023,2024,2025],rev:[36025555,35480758,34859502,35003500,35872903,39479602],exp:[34078765,35045594,40024335,39060011,44300360,49311565]};
 const CH={years:[2018,2019,2020,2021,2022,2023,2024],gross:[837,888,932,973,985,983,1006],net:[529,555,580,615,605,596,595],cost:[180,175,181,218,223,233,248],margin:[349,380,399,397,382,362,347],ch:[42561,46552,46391,43116,39268,37602,38169]};
 const ATH_TREND={years:[2015,2016,2017,2018,2019,2020,2021,2022,2023,2024],total:[797027,855140,1016964,652295,652886,826932,1194900,521107,232232,-847907]};
+const NTR_PER_ATHLETE={
+  "Men's Basketball":3420,"Women's Basketball":12029,"Women's Volleyball":12003,
+  "Women's Softball":15010,"Men's Baseball":13597,"Women's Tennis":13052,
+  "Women's Soccer":16088,"Women's Golf":12442,"Men's Cross Country":6480,
+  "Women's Cross Country":4757,"Women's IT&F":7036,"Men's Tennis":16536,
+  "Men's Golf":15442,"Women's JV Basketball":11868,"Men's Track":13169,
+  "Women's JV Volleyball":16304,"Men's Soccer":14641,"Women's OT&F":9030,
+  "JV Men's Basketball":16577,"Women's Stunt":17735,"JV Men's Baseball":20411
+};
 const UGPROG=[
   {p:"Computer Science",pct:.742,st:23},{p:"Business",pct:.720,st:141},{p:"Biology",pct:.711,st:130},
   {p:"Biblical Studies",pct:.711,st:25},{p:"Psychology",pct:.687,st:76},{p:"Kinesiology",pct:.643,st:50},
@@ -700,6 +714,7 @@ function buildAthCtrl(){
       <td class="lab" style="font-size:10px">${s.s}</td>
       <td class="r">${s.a}</td>
       <td class="r ${s.m>=0?'pos':'neg'}">${fmtK(s.m)}</td>
+      <td class="c" style="font-family:var(--mono);font-size:11px;color:var(--bl)">${(NTR_PER_ATHLETE[s.s]||0).toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0})}</td>
       <td class="c">
         <div class="tog-group">
           <button class="tog ${athState[i]===0?'active-b':''}" onclick="setAth(${i},0,this)">Keep D2</button>
@@ -776,7 +791,8 @@ function updateAthTotals(){
   const isFullExit=eliminatedSports>=15;
   const exitFee=isFullExit?exitInputs.fee:0;
   const severance=isFullExit?exitInputs.sev:0;
-  const scholarshipTail=eliminatedAthletes*exitInputs.scholVal*exitInputs.scholYrs;
+  const scholStayPct=parseFloat(document.getElementById('d2-schol-stay-pct')?.value||60)/100;
+  const scholarshipTail=eliminatedAthletes*exitInputs.scholVal*exitInputs.scholYrs*scholStayPct;
   const totalExitCost=isFullExit?exitFee+severance+scholarshipTail+50000:scholarshipTail;
   const finalNet=totalNet-totalExitCost;
 
@@ -787,7 +803,7 @@ function updateAthTotals(){
   if(s('ath-tot-imp')){s('ath-tot-imp').textContent=fmtK(totalNet);s('ath-tot-imp').className='impact-cell '+(totalNet>0?'pos':totalNet<0?'neg':'');}
   if(s('d2-c1')) s('d2-c1').textContent=isFullExit?'('+fmtK(exitFee).replace('(',''):'N/A — partial cut';
   if(s('d2-c2')) s('d2-c2').textContent=isFullExit?'('+fmtK(severance).replace('(',''):'N/A — partial cut';
-  if(s('d2-c3')) s('d2-c3').textContent=eliminatedAthletes>0?'('+fmtK(scholarshipTail).replace('(',''):'$0 — no athletes eliminated';
+  if(s('d2-c3')){const stayPct=parseFloat(document.getElementById('d2-schol-stay-pct')?.value||60);s('d2-c3').textContent=eliminatedAthletes>0?fmtK(-scholarshipTail)+' ('+stayPct+'% staying)':'$0 — no athletes eliminated';}
   if(s('d2-total-exit')){s('d2-total-exit').textContent='('+fmtK(totalExitCost).replace('(','');s('d2-total-exit').className='r neg';}
   if(s('ath-net-final')){
     s('ath-net-final').textContent=fmtK(finalNet);
@@ -1063,7 +1079,8 @@ function getAthNetImpact(){
   const eliminatedAthletes=SPORTS_DATA.filter((_,i)=>athState[i]===2).reduce((a,s)=>a+s.a,0);
   const eliminatedSports=athState.filter(s=>s===2).length;
   const isFullExit=eliminatedSports>=15;
-  const scholarshipTail=eliminatedAthletes*exitInputs.scholVal*exitInputs.scholYrs;
+  const scholStayPct=parseFloat(document.getElementById('d2-schol-stay-pct')?.value||60)/100;
+  const scholarshipTail=eliminatedAthletes*exitInputs.scholVal*exitInputs.scholYrs*scholStayPct;
   const exitCosts=isFullExit?exitInputs.fee+exitInputs.sev+scholarshipTail+50000:scholarshipTail;
   return totalNet-exitCosts;
 }
