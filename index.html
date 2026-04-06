@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -767,7 +768,7 @@ function updateAthTotals(){
     const saveEl=document.getElementById('ath-save-'+i);
     const lossEl=document.getElementById('ath-loss-'+i);
     if(saveEl) saveEl.textContent=imp.save>0?fmtK(imp.save):'—';
-    if(lossEl) lossEl.textContent=imp.loss>0?'('+fmtK(imp.loss).replace('(',''):'—';
+    if(lossEl) lossEl.textContent=imp.loss>0?fmtK(-imp.loss):'—';
   });
 
   // D2 exit costs (only if full exit — more than 15 sports eliminated)
@@ -1070,11 +1071,14 @@ function getAthNetImpact(){
 function getProgNetImpact(){
   let total=0;
   ALL_PROGS.forEach((p,i)=>{
-    const enrEl=document.getElementById('prog-enr-'+i);
-    const delta=enrEl?parseInt(enrEl.value)||0:0;
+    const gr=progGrowthRate[i]||0;
     const state=progState[i];
-    if(state===0) total-=(p.st*p.pct*10000)+(p.st*10000*0.15);
-    else total+=delta*p.pct*10000;
+    if(state===0){
+      total-=(p.st*p.pct*10000)+(p.st*10000*0.15);
+    } else {
+      const delta=Math.round(p.st*gr/100);
+      total+=delta*p.pct*10000;
+    }
   });
   return total;
 }
@@ -1101,15 +1105,19 @@ function updatePL(){
   const enrollNet=getEnrollNetImpact();
   const adminSave=getAdminSavings();
 
-  // Revenue changes: enrollment + prog growth
-  const revChange=enrollNet>0?enrollNet*0.7:enrollNet; // conservative
-  const projRev=BASE_REV+revChange+(progNet>0?progNet*0.5:0)+1000000; // +$1M tuition increase FY27
+  // Revenue changes
+  // progNet is contribution margin change — split ~60% revenue / 40% cost impact
+  const progRevChange=progNet*0.6;
+  const progExpChange=progNet<0?progNet*0.3:0;
+  // enrollNet is already net of recruitment cost
+  const enrollRevChange=enrollNet;
+  const instrChange=enrollNet>0?enrollNet*0.3:0;
+  const projRev=BASE_REV+progRevChange+enrollRevChange+1000000; // +$1M tuition escalator FY27
 
   // Expense changes
-  const athExpChange=-(athNet>0?athNet*0.4:0); // partial expense offset
-  const progExpChange=progNet<0?progNet*0.3:0; // program closures add some teach-out cost
-  const instrChange=enrollNet>0?enrollNet*0.35:0; // more students = more instruction cost
-  const projExp=BASE_EXP-adminSave+athExpChange+progExpChange+instrChange-800000; // -$800K some baseline efficiency
+  // athNet is the direct ops savings minus tuition loss minus exit costs — apply to expense line
+  const athExpChange=-athNet; // negative athNet = net cost, positive = net savings reducing expenses
+  const projExp=BASE_EXP-adminSave+athExpChange+progExpChange+instrChange-800000;
 
   const projNet=projRev-projExp;
 
